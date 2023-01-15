@@ -1,0 +1,210 @@
+openapi: 3.0.3
+info:
+  title: Parking Management Service
+  description: Self contained system for parking management
+  version: '1.0.0'
+#basePath: '/v1/parking-management-service'
+servers:
+  - description: Dev
+    url: http://localhost:5051
+
+tags:
+  - name: business
+    description: Business APIs
+  - name: attendant
+    description: Attendant APIs
+
+paths:
+  /businesses:
+    post:
+      tags:
+        - business
+      operationId: registerBusiness
+      summary:  Register a new business
+      description: Register a new business
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/RegisterBusinessRequest'
+      responses:
+        '201':
+          description: Business Registered successfully
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  
+  /carts/{cartId}:
+    get:
+      tags:
+        - "cart"
+      operationId: getCartByCartId
+      summary:  Get cart by cart Id
+      description: get cart
+      parameters:
+        - $ref: '#/components/parameters/cartId'
+      responses:
+        '200':
+          description: Cart fetched successfully
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+
+  /carts/customers/{customerId}:
+    get:
+      tags:
+        - "cart"
+      operationId: getCartByCustomerId
+      summary:  Get cart by customer Id
+      description: get cart      
+      parameters:
+        - $ref: '#/components/parameters/customerId'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 5
+            description: define no. of carts in one page  
+        - name: pageNumber
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            description: define no. of pages
+      responses:
+        '200':
+          description: Cart fetched successfully
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListCartResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'        
+
+
+components:
+
+  parameters:
+
+    customerId:
+      name: customerId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+      description: ID of customer  
+
+    cartId:
+      name: cartId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+      description: ID of cart   
+
+  schemas:
+    MetaData:
+      type: object
+      properties:
+        createdAt: 
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+        createdBy: 
+          type: string  
+        updatedBy: 
+          type: string
+          
+    Error:
+      type: object
+      required:
+        - code
+        - status
+        - description
+      properties:
+        code:
+          type: string
+          description: HTTP code
+        status:
+          type: string
+          description: HTTP status
+        description:
+          type: string
+          description: error details        
+
+    CreateCartRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/CreateCartRequestData'
+   
+
+    CartResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/CartResponseData'
+        meta:
+          $ref: "#/components/schemas/MetaData"
+        links:
+          $ref: '#/components/schemas/SelfLink'
+    
+    CreateCartRequestData:     
+      type: object
+      required:
+        - customerId
+        - shopId
+      properties:
+        customerId:
+          $ref: '#/components/schemas/UUID'
+        customerName:
+          type: string
+          example: Anushi
+        shopId:
+          $ref: '#/components/schemas/UUID'
+        shopName:
+          type: string
+          example: Agrawal Chakki
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+    
+    UUID:
+      type: string
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      example: 60327eee-e081-47e6-ba41-127afbac2291                     
+    
+
+  responses:
+    ErrorResponse:
+      description: standard error response for all errors
+      content:
+        application/vnd.api+json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+
+
+      
