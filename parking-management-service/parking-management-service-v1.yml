@@ -9,197 +9,950 @@ servers:
     url: http://localhost:5051
 
 tags:
-  - name: business
+  - name: businesses
     description: Business APIs
-  - name: attendant
+  - name: attendants
     description: Attendant APIs
-
+  - name: forms
+    description: Form APIs associated with the business
+  - name: visitors
+    description: Vistor APIs associated with the business
+  - name: reports
+    description: Reports APIs associated with the business
 paths:
   /businesses:
     post:
       tags:
-        - business
+        - businesses
       operationId: registerBusiness
       summary:  Register a new business
       description: Register a new business
       requestBody:
         required: true
         content:
-          application/vnd.api+json:
+          application/json:
             schema:
               $ref: '#/components/schemas/RegisterBusinessRequest'
       responses:
         '201':
           description: Business Registered successfully
           content:
-            application/vnd.api+json:
+            application/json:
               schema:
-                $ref: '#/components/schemas/CartResponse'
+                $ref: '#/components/schemas/BusinessResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
 
-  
-  /carts/{cartId}:
     get:
       tags:
-        - "cart"
-      operationId: getCartByCartId
-      summary:  Get cart by cart Id
-      description: get cart
+        - businesses
+      operationId: getBusinesses
+      summary:  Get list of businesses
+      description: Get list of businesses
       parameters:
-        - $ref: '#/components/parameters/cartId'
-      responses:
-        '200':
-          description: Cart fetched successfully
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/CartResponse'
-        default:
-          $ref: '#/components/responses/ErrorResponse'
-
-
-  /carts/customers/{customerId}:
-    get:
-      tags:
-        - "cart"
-      operationId: getCartByCustomerId
-      summary:  Get cart by customer Id
-      description: get cart      
-      parameters:
-        - $ref: '#/components/parameters/customerId'
-        - name: pageSize
+        - name: offset 
           in: query
           required: false
           schema:
             type: integer
-            minimum: 1
-            default: 5
-            description: define no. of carts in one page  
-        - name: pageNumber
+            default: 0
+        - name: limit 
           in: query
           required: false
           schema:
             type: integer
-            minimum: 1
-            default: 1
-            description: define no. of pages
+            default: 10    
       responses:
         '200':
-          description: Cart fetched successfully
+          description: Businesses list fetched successfully
           content:
-            application/vnd.api+json:
+            application/json:
               schema:
-                $ref: '#/components/schemas/ListCartResponse'
+                $ref: '#/components/schemas/ListBusinessResponse'
         default:
-          $ref: '#/components/responses/ErrorResponse'        
+          $ref: '#/components/responses/ErrorResponse'      
 
+
+  /businesses/{businessId}:
+    put:
+      tags:
+        - businesses
+      operationId: updateBusiness
+      summary:  Update an existing business
+      description: Update an existing business
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBusinessRequest'
+      responses:
+        '200':
+          description: Business Updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    get:
+      tags:
+        - businesses
+      operationId: getBusinessById
+      summary:  Get business by Id
+      description: Get business by Id
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+      responses:
+        '200':
+          description: Business fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'      
+
+  /attendants:
+    post:
+      tags:
+        - attendants
+      operationId: registerAttendant
+      summary:  Register a new attendant
+      description: Register a new attendant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterAttendantRequest'
+      responses:
+        '201':
+          description: Attendant Registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendantResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    get:
+      tags:
+        - attendants
+      operationId: getAttendants
+      summary:  Get list of Attendants
+      description: Get list of Attendants
+      parameters:
+        - name: offset 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10    
+      responses:
+        '200':
+          description: Attendants list fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAttendantsResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /attendants/{attendantId}:
+    put:
+      tags:
+        - attendants
+      operationId: updateAttendant
+      summary:  Update an existing attendant
+      description: Update an existing attendant
+      parameters:
+        - $ref: "#/components/parameters/attendantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAttendantRequest'
+      responses:
+        '200':
+          description: Attendant updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendantResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'      
+
+    get:
+      tags:
+        - attendants
+      operationId: getAttendantById
+      summary:  Get attendant by Id
+      description: Get attendant by Id
+      parameters:
+        - $ref: "#/components/parameters/attendantId"
+      responses:
+        '200':
+          description: Attendant fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendantResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'      
+
+  /businesses/{businessId}/forms:
+    post:
+      tags:
+        - forms
+      operationId: addFormToBusiness
+      summary:  Add a new form to a business
+      description: Add a new form to a business
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddBusinessFormRequest'
+      responses:
+        '201':
+          description: Form associated to business successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessFormResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    get:
+      tags:
+        - forms
+      operationId: getFormsOfBusiness
+      summary:  List forms associated to a business
+      description: List forms associated to a business
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - name: offset 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10 
+      responses:
+        '200':
+          description: List of forms associated to business fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListBusinessFormResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'      
+
+  /businesses/{businessId}/forms/{formId}:
+    put:
+      tags:
+        - forms
+      operationId: updateFormOfBusiness
+      summary:  Update existing form associated to a business
+      description: Update existing form associated to a business
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - $ref: "#/components/parameters/formId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBusinessFormRequest'
+      responses:
+        '200':
+          description: Form associated to business updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessFormResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse' 
+
+    get:
+      tags:
+        - forms
+      operationId: getFormOfBusinessById
+      summary:  get form associated to a business by Id
+      description: get form associated to a business by Id
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - $ref: "#/components/parameters/formId"
+      responses:
+        '200':
+          description: Form associated to business fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessFormResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse' 
+
+    delete:
+      tags:
+        - forms
+      operationId: deleteFormOfBusinessById
+      summary:  delete form associated to a business by Id
+      description: delete form associated to a business by Id
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - $ref: "#/components/parameters/formId"
+      responses:
+        '204':
+          description: Form associated to business deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'                    
+
+  /businesses/{businessId}/forms/{formId}/visitors:
+    post:
+      tags:
+        - visitors
+      operationId: addVisitorToBusiness
+      summary:  Add a new visitor to a business
+      description: Add a new visitor to a business
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - $ref: "#/components/parameters/formId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddVisitorBusinessFormRequest'
+      responses:
+        '201':
+          description: Vistor added to business successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitorBusinessFormResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /businesses/{businessId}/forms/{formId}/visitors/{visitorId}:
+    put:
+      tags:
+        - visitors
+      operationId: updateVisitorToBusiness
+      summary:  Add a new visitor to a business
+      description: Add a new visitor to a business
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - $ref: "#/components/parameters/formId"
+        - $ref: "#/components/parameters/visitorId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVisitorBusinessFormRequest'
+      responses:
+        '200':
+          description: Vistor updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitorBusinessFormResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    get:
+      tags:
+        - visitors
+      operationId: getVisitorById
+      summary:  Fetch visitor of business By Visitor Id
+      description: Fetch visitor of business By Visitor Id
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - $ref: "#/components/parameters/formId"
+        - $ref: "#/components/parameters/visitorId"
+      responses:
+        '200':
+          description: Vistor fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitorBusinessFormResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'      
+
+    delete:
+      tags:
+        - visitors
+      operationId: deleteVisitorById
+      summary:  Delete visitor of business By Visitor Id
+      description: Delete visitor of business By Visitor Id
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - $ref: "#/components/parameters/formId"
+        - $ref: "#/components/parameters/visitorId"
+      responses:
+        '204':
+          description: Vistor deleted successfully
+        default:
+          $ref: '#/components/responses/ErrorResponse'            
+
+  /businesses/{businessId}/forms/{formId}/reports:
+    get:
+      tags:
+        - reports
+      operationId: getAllVisitorsOfBusinessByFormId
+      summary:  Fetch all visitors of business By Form Id
+      description: Fetch all visitors of business By Form Id
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - $ref: "#/components/parameters/formId"
+        - name: offset 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10 
+      responses:
+        '200':
+          description: Vistors fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListVisitorBusinessFormResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'      
+
+  /businesses/{businessId}/reports:
+    get:
+      tags:
+        - reports
+      operationId: getAllVisitorsOfBusiness
+      summary:  Fetch all the visitors of a business
+      description: Fetch all the visitors of a business
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+        - name: offset 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10 
+      responses:
+        '200':
+          description: Vistors fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListVisitorBusinessFormResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
 components:
-
   parameters:
-
-    customerId:
-      name: customerId
+    businessId:
+      name: businessId
       in: path
       required: true
       schema:
-        $ref: '#/components/schemas/UUID'
-      description: ID of customer  
-
-    cartId:
-      name: cartId
+        type: string
+      description: ID of business  
+    attendantId:     
+      name: attendantId
       in: path
       required: true
       schema:
-        $ref: '#/components/schemas/UUID'
-      description: ID of cart   
+        type: string
+      description: ID of attendant 
+    formId:
+      name: formId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID of form associated with the business 
+    visitorId:
+      name: visitorId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID of visitor associated to a business 
 
   schemas:
-    MetaData:
-      type: object
-      properties:
-        createdAt: 
-          type: string
-          format: date-time
-        updatedAt: 
-          type: string
-          format: date-time
-        createdBy: 
-          type: string  
-        updatedBy: 
-          type: string
-          
     Error:
       type: object
       required:
         - code
-        - status
+        - message
         - description
       properties:
         code:
           type: string
           description: HTTP code
-        status:
+        message:
           type: string
-          description: HTTP status
+          description: error message
         description:
           type: string
           description: error details        
 
-    CreateCartRequest:
+    RegisterBusinessRequest:
       type: object
       required:
-        - data
+        - businessName
+        - firstName
+        - lastName
+        - businessContactNo
+        - personalEmailId
       properties:
-        data:
-          $ref: '#/components/schemas/CreateCartRequestData'
-   
-
-    CartResponse:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          $ref: '#/components/schemas/CartResponseData'
-        meta:
-          $ref: "#/components/schemas/MetaData"
-        links:
-          $ref: '#/components/schemas/SelfLink'
+        businessName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        middleName:
+          type: string
+        businessContactNo:
+          type: string
+        personalContactNo:
+          type: string
+        businessAddress:
+          type: string
+        businessPincode:
+          type: string  
+        personalAddress:
+          type: string
+        personalPincode:
+          type: string
+        businessEmailId:
+          type: string
+        personalEmailId:
+          type: string
+        gstNo:
+          type: string
+        pancardNo:
+          type: string
     
-    CreateCartRequestData:     
+    UpdateBusinessRequest:
       type: object
       required:
-        - customerId
-        - shopId
+        - businessId
       properties:
-        customerId:
-          $ref: '#/components/schemas/UUID'
-        customerName:
+        businessId:
           type: string
-          example: Anushi
-        shopId:
-          $ref: '#/components/schemas/UUID'
-        shopName:
+        businessName:
           type: string
-          example: Agrawal Chakki
-        items:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        middleName:
+          type: string
+        businessContactNo:
+          type: string
+        personalContactNo:
+          type: string
+        businessAddress:
+          type: string
+        businessPincode:
+          type: string  
+        personalAddress:
+          type: string
+        personalPincode:
+          type: string
+        businessEmailId:
+          type: string
+        personalEmailId:
+          type: string
+        gstNo:
+          type: string
+        pancardNo:
+          type: string
+
+    BusinessResponse:
+      type: object
+      properties:
+        businessId:
+          type: string
+        businessName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        middleName:
+          type: string
+        businessContactNo:
+          type: string
+        personalContactNo:
+          type: string
+        businessAddress:
+          type: string
+        businessPincode:
+          type: string  
+        personalAddress:
+          type: string
+        personalPincode:
+          type: string
+        businessEmailId:
+          type: string
+        personalEmailId:
+          type: string
+        gstNo:
+          type: string
+        pancardNo:
+          type: string
+        links:
           type: array
           items:
-            $ref: '#/components/schemas/Item'
+            $ref: "#/components/schemas/ResponseLinks"  
+
+    ListBusinessResponse:
+      type: object
+      properties:
+        start:
+          type: integer
+        count:
+          type: integer
+        totalCount:
+          type: integer
+        totalPages:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BusinessResponse"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseLinks"
+
+    RegisterAttendantRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - mobileNo
+      properties:
+        firstName:
+          type: string
+        middleName:
+          type: string  
+        lastName:
+          type: string
+        mobileNo: 
+          type: string
+        aadharCardNo:
+          type: string
+        location:
+          type: string
+        photoName:
+          type: string
+        isActive:
+          type: boolean
+
+    UpdateAttendantRequest:
+      type: object
+      required:
+        - attendantId
+      properties:
+        attendantId:
+          type: string
+        firstName:
+          type: string
+        middleName:
+          type: string  
+        lastName:
+          type: string
+        mobileNo: 
+          type: string
+        aadharCardNo:
+          type: string
+        location:
+          type: string
+        photoName:
+          type: string
+        isActive:
+          type: boolean
+
+    AttendantResponse:
+      type: object
+      properties:
+        attendantId:
+          type: string
+        firstName:
+          type: string
+        middleName:
+          type: string  
+        lastName:
+          type: string
+        mobileNo: 
+          type: string
+        aadharCardNo:
+          type: string
+        location:
+          type: string
+        photoName:
+          type: string
+        isActive:
+          type: boolean    
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseLinks"
+
+    ListAttendantsResponse:
+      type: object
+      properties:
+        start:
+          type: integer
+        count:
+          type: integer
+        totalCount:
+          type: integer
+        totalPages:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttendantResponse"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseLinks"
+
+    AddBusinessFormRequest:
+      type: object
+      required:
+        - businessId
+      properties:
+        businessId:
+          type: string
+        header:
+          type: object
+          $ref: "#/components/schemas/FormHeader"
+        formDetails:
+          properties:
+            properties:
+              type: array
+              items:
+                $ref: "#/components/schemas/FormProperty"
+
+    UpdateBusinessFormRequest:
+      type: object
+      required:
+        - businessId
+        - formId
+      properties:
+        formId:
+          type: string
+        businessId:
+          type: string
+        header:
+          type: object
+          $ref: "#/components/schemas/FormHeader"
+        formDetails:
+          properties:
+            properties:
+              type: array
+              items:
+                $ref: "#/components/schemas/FormProperty"
+
+    FormHeader:
+      properties:
+            businessName:
+              type: string
+            occasion:
+              type: string
     
-    UUID:
-      type: string
-      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-      example: 60327eee-e081-47e6-ba41-127afbac2291                     
-    
+    FormProperty:
+      properties:
+        fieldName:
+          type: string
+        label:
+          type: string   
+        defaultValue:
+          type: string 
+        isRequired:
+          type: boolean
+        maxLength:
+          type: integer
+        minLength:
+          type: integer
+
+    BusinessFormResponse:
+      type: object
+      required:
+        - businessId
+        - formId
+      properties:
+        formId:
+          type: string
+        businessId:
+          type: string
+        header:
+          type: object
+          $ref: "#/components/schemas/FormHeader"
+        formDetails:
+          properties:
+            properties:
+              type: array
+              items:
+                $ref: "#/components/schemas/FormProperty"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseLinks"
+          description: Self link, link for business and link for list of all associated forms to the business should be added here
+
+    ListBusinessFormResponse:
+      type: object
+      properties:
+        start:
+          type: integer
+        count:
+          type: integer
+        totalCount:
+          type: integer
+        totalPages:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BusinessFormResponse"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseLinks"
+
+    AddVisitorBusinessFormRequest:
+      type: object
+      required:
+        - businessId
+        - formId
+      properties:
+        businessId:
+          type: string
+        formId:
+          type: string
+        visitorDetails:
+          type: object
+          additionalProperties: true
+          description: Free Text - contains key value pairs based on the fields of the associated form
+          example:
+            firstName: Test
+            lastName: Test
+
+    UpdateVisitorBusinessFormRequest:
+      type: object
+      required:
+        - businessId
+        - formId
+        - visitorId
+      properties:
+        visitorId:
+          type: string
+        businessId:
+          type: string
+        formId:
+          type: string
+        visitorDetails:
+          type: object
+          additionalProperties: true
+          description: Free Text - contains key value pairs based on the fields of the associated form
+          example:
+            firstName: Test
+            lastName: Test
+      
+
+    VisitorBusinessFormResponse:
+      type: object
+      properties:
+        vistorId:
+          type: string
+        businessId:
+          type: string
+        formId:
+          type: string
+        visitorDetails:
+          type: object
+          additionalProperties: true
+          description: Free Text - contains key value pairs based on the fields of the associated form
+          example:
+            firstName: Test
+            lastName: Test
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseLinks"
+          description: Self link, link for business and link for associated form to the business should be added here
+
+    ListVisitorBusinessFormResponse:
+      type: object
+      properties:
+        start:
+          type: integer
+        count:
+          type: integer
+        totalCount:
+          type: integer
+        totalPages:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/VisitorBusinessFormResponse"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseLinks"
+
+    ResponseLinks:
+      type: object
+      properties:
+        href:
+          type: string
+        rel:
+          type: string
+          example: self
 
   responses:
     ErrorResponse:
       description: standard error response for all errors
       content:
-        application/vnd.api+json:
+        application/json:
           schema:
             type: object
             properties:
