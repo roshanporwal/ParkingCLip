@@ -19,6 +19,11 @@ tags:
     description: Vistor APIs associated with the business
   - name: reports
     description: Reports APIs associated with the business
+  - name: parkings
+    description: Visitor parking APIs
+  - name: commons
+    description: Common utility APIs
+      
 paths:
   /businesses:
     post:
@@ -114,7 +119,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/BusinessResponse'
         default:
-          $ref: '#/components/responses/ErrorResponse'      
+          $ref: '#/components/responses/ErrorResponse'
+  
+  /attendants/login:
+    post:
+      tags:
+        - attendants
+      operationId: loginAttendant
+      summary:  Attendant Login
+      description: Attendant Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginAttendantRequest'
+      responses:
+        '201':
+          description: Attendant Registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendantResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /attendants:
     post:
@@ -478,6 +506,113 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
 
+  
+  /parkings/vehicle/scan:
+    post:
+      tags:
+        - parkings
+      operationId: scanVehicle
+      summary:  Scan vehicle number plate
+      description: Scan vehicle number plate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanVehicleNumberRequest'
+      responses:
+        '201':
+          description: Attendant Registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleParkingTicketResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /parkings/vehicle/ticket/{mobileNo}:
+    get:
+      tags:
+        - parkings
+      operationId: getVehicleParkingTicket
+      summary:  Get scanned vehicle parking ticket by mobile no
+      description: Get scanned vehicle parking ticket by mobile no
+      parameters:
+        - $ref: '#/components/parameters/mobileNo'
+      responses:
+        '201':
+          description: Attendant Registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleParkingTicketResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /parkings/vehicle/tickets:
+    get:
+      tags:
+        - parkings
+      operationId: getAllVisitorsParkingTicket
+      summary:  Fetch all visitors parking ticket
+      description: Fetch all visitors parking ticket
+      parameters:
+        - name: fromDate
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: toDate
+          in: query
+          required: true
+          schema:
+            type: string    
+        - name: offset 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit 
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10 
+      responses:
+        '200':
+          description: Vistors fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListVehicleParkingTicketResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'                      
+
+  /commons/attendants/photo/upload:
+    post:
+      tags:
+        - commons
+      operationId: uploadAttendantPhoto
+      summary:  Upload attendant's photo
+      description: Upload attendant's photo before register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpoadAttendantPhotoRequest'
+      responses:
+        '201':
+          description: Attendant Registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpoadAttendantPhotoResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+
 components:
   parameters:
     businessId:
@@ -507,7 +642,14 @@ components:
       required: true
       schema:
         type: string
-      description: ID of visitor associated to a business 
+      description: ID of visitor associated to a business
+    mobileNo:
+      name: mobileNo
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Mobile number of visitor   
 
   schemas:
     Error:
@@ -658,7 +800,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ResponseLinks"
-
+    LoginAttendantRequest:
+      type: object
+      required:
+        - mobileNo
+      properties:
+        mobileNo:
+          type: string
+          
     RegisterAttendantRequest:
       type: object
       required:
@@ -939,6 +1088,7 @@ components:
           items:
             $ref: "#/components/schemas/ResponseLinks"
 
+    
     ResponseLinks:
       type: object
       properties:
@@ -948,6 +1098,59 @@ components:
           type: string
           example: self
 
+    UpoadAttendantPhotoRequest:
+      type: object
+      properties:        
+        file:
+          type: string
+        mobileNo:
+          type: string
+
+    UpoadAttendantPhotoResponse:
+      type: object
+      properties:        
+        fileName:
+          type: string        
+
+    ScanVehicleNumberRequest:
+      type: object
+      properties:        
+        file:
+          type: string
+        mobileNo:
+          type: string
+
+    VehicleParkingTicketResponse:
+      type: object
+      properties:        
+        vehicleRegistrationNo:
+          type: string
+        qrCode:
+          type: string
+        mobileNo:
+          type: string
+        attendantId:
+          type: string
+
+    ListVehicleParkingTicketResponse:
+      type: object
+      properties:
+        start:
+          type: integer
+        count:
+          type: integer
+        totalCount:
+          type: integer
+        totalPages:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/VehicleParkingTicketResponse"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseLinks"    
   responses:
     ErrorResponse:
       description: standard error response for all errors
