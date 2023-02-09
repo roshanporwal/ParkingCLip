@@ -612,6 +612,26 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
 
+  /commons/otp/generate/{mobileNo}:
+    get:
+      tags:
+        - commons
+      operationId: generateOtp
+      summary:  Generate otp for user login
+      description: Generate otp for user login
+      parameters:
+        - $ref: '#/components/parameters/mobileNo'
+      responses:
+        '200':
+          description: Attendant Registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateOtpResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'      
+
+
 
 components:
   parameters:
@@ -804,8 +824,11 @@ components:
       type: object
       required:
         - mobileNo
+        - otp
       properties:
         mobileNo:
+          type: string
+        otp:
           type: string
           
     RegisterAttendantRequest:
@@ -1119,6 +1142,10 @@ components:
           type: string
         mobileNo:
           type: string
+        attendantId:
+          type: string
+        vehicleType:
+          type: string
 
     VehicleParkingTicketResponse:
       type: object
@@ -1131,6 +1158,16 @@ components:
           type: string
         attendantId:
           type: string
+        attendantName:
+          type: string
+        parkingLocation:
+          type: string
+        entryDateTime:
+          type: string
+        vehicleType:
+          type: string
+        ticketPaymentDetails:
+          $ref: "#/components/schemas/ticketPaymentDetails"    
 
     ListVehicleParkingTicketResponse:
       type: object
@@ -1150,7 +1187,21 @@ components:
         links:
           type: array
           items:
-            $ref: "#/components/schemas/ResponseLinks"    
+            $ref: "#/components/schemas/ResponseLinks"
+
+    ticketPaymentDetails:
+      type: object
+      
+    GenerateOtpResponse:
+      type: object
+      properties:
+        otp:
+          type: string
+        mobileNo:
+          type: string
+        validTill:
+          type: number
+          description: "Otp validity in seconds"
   responses:
     ErrorResponse:
       description: standard error response for all errors
