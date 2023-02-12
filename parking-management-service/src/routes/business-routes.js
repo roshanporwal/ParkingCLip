@@ -11,10 +11,10 @@ route.post('/',  businessController.createBusiness)
 route.get('/',  businessController.getBusinessList)
 
 //update business
-route.put('/',  businessController.updateBusiness)
+route.put('/:businessId',  businessController.updateBusiness)
 
 //Get business by id
-route.get('/',  businessController.getBusinessById)
+route.get('/:businessId',  businessController.getBusinessById)
 
 
 

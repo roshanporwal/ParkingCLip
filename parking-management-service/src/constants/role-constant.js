@@ -1,0 +1,6 @@
+const USER_ROLE = {
+    ADMIN:"ADMIN", ATTENDANT:"ATTENDANT", BUSINESS_OWNER: "BUSINESS_OWNER"
+}
+
+
+module.exports = USER_ROLE

@@ -1,11 +1,15 @@
 const express = require('express');
 
 const route = express.Router()
+const CommonController = require('../controller/common-controller')
 
-route.get('/',  (req, res) => {
-    res.send("hello!!!")
+route.post('/attendants/photo/upload', CommonController.uploadAttendantPhoto)
     
-})
+route.get('/otp/generate/:mobileNo', CommonController.generateOtp)
+
+route.post('/login', CommonController.userLogin)
+
+
 
 
 

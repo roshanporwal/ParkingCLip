@@ -1,5 +1,5 @@
 
-const Error = require('../utils/error-response')
+const ApiResponse = require('../utils/api-response')
 
 function scanVehicle(req, res, next){
     const mobileNo = req.body.mobileNo
