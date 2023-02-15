@@ -50,14 +50,16 @@ async function getAttendantsList(page, limit, user){
         limit: parseInt(limit, 10) || 10
     }
     try {
+        var recCount = await AttendantDb.count()
         result = await AttendantDb.find()
         .skip(pageOptions.page * pageOptions.limit)
         .limit(pageOptions.limit)
     } catch (error) {
         return new ApiResponse(500, 'Exception While Fetching Attendant List!.', null, err.message)
     }
-    //TODO : update result for paggination link  
-    return new ApiResponse(200, "Fetched Attendant list", null, result)
+    //TODO : update result for paggination link 
+    let listData = {start: page, count: result.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: result} 
+    return new ApiResponse(200, "Fetched Attendant list", null, listData)
 }
 
 module.exports={

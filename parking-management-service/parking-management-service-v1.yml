@@ -646,7 +646,7 @@ paths:
           required: true
           schema:
             type: string    
-        - name: offset 
+        - name: page 
           in: query
           required: false
           schema:

@@ -8,10 +8,10 @@ const parkingController = require('../controller/parking-controller')
 route.post('/vehicle/scan', parkingController.scanVehicle)
 
 //Get parking ticket
-route.get('vehicle/ticket/:mobileNo',  parkingController.getParkingTicket)
+route.get('/vehicle/ticket/:mobileNo',  parkingController.getParkingTicket)
 
 //Get list of parking tickets
-route.get('vehicle/tickets',  parkingController.getListOfParkingTicket)
+route.get('/vehicle/tickets',  parkingController.getListOfParkingTicket)
 
 
 
