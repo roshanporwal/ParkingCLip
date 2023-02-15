@@ -1308,6 +1308,8 @@ components:
           type: string
         vehicleType:
           type: string
+        parkingStatus:
+          type: string
         ticketPaymentDetails:
           $ref: "#/components/schemas/ticketPaymentDetails"    
 

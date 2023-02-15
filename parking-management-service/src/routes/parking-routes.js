@@ -13,6 +13,9 @@ route.get('/vehicle/ticket/:mobileNo',  parkingController.getParkingTicket)
 //Get list of parking tickets
 route.get('/vehicle/tickets',  parkingController.getListOfParkingTicket)
 
+//Get parking ticket
+route.put('/vehicle/ticketStatus/:ticketId/:status',  parkingController.updateParkingTicket)
+
 
 
 

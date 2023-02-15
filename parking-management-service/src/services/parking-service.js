@@ -3,6 +3,8 @@ const ParkingTicketDb = require('../database/models/parkingTicketDb')
 const AttendantDb = require('../database/models/attendantDb')
 const QRCodeGenerator = require('../utils/qrcode-generator')
 const { count } = require('../database/models/parkingTicketDb')
+const PARKING_STATUS = require('../constants/parking-status')
+const { v4: uuidv4 } = require('uuid');
 
 async function generateParkingTicket(payload){
     try {
@@ -13,6 +15,7 @@ async function generateParkingTicket(payload){
         let qrcode = await QRCodeGenerator.generateQrcode(payload.mobileNo,"string")
 
         let parkingTicketDb = new ParkingTicketDb({
+            ticketId: uuidv4(),
             vehicleRegistrationNo: "string",
             qrCode: qrcode,
             mobileNo: payload.mobileNo,
@@ -22,6 +25,7 @@ async function generateParkingTicket(payload){
             entryDateTime: new Date(),
             vehicleType: payload.vehicleType,
             businessId: attendantDb.business.businessId,
+            parkingStatus: PARKING_STATUS.PARKED,
             ticketPaymentDetails: {}
 
         })
@@ -33,6 +37,17 @@ async function generateParkingTicket(payload){
         console.log("Error ",error.message)
         return new ApiResponse(500, 'Exception While generating Parking ticket!.', null, error.message)
     }    
+}
+
+async function updateParkingTicketStatus(ticketId, status){
+    if(!parkingStatus[status])
+        return new ApiResponse(400, 'Parking Ticket Status Is Invalid!', null, null)
+    
+    parkingTicketDb = await ParkingTicketDb.findOneAndUpdate({ticketId: ticketId}, {parkingStatus: parkingStatus[status]}, {new: true})
+    
+    if(!parkingTicketDb)
+        return new ApiResponse(400, 'Parking Ticket Id Is Invalid!', null, null)
+    else return new ApiResponse(200, 'Parking Ticket Generated Successfully!', null, parkingTicketDb)       
 }
 
 async function getParkingTicket(mobileNo){
@@ -78,5 +93,5 @@ async function getListOfParkingTicket(fromDate, toDate, page, limit){
 }
 
 module.exports={
-    generateParkingTicket, getParkingTicket, getListOfParkingTicket
+    generateParkingTicket, getParkingTicket, getListOfParkingTicket, updateParkingTicketStatus
 }

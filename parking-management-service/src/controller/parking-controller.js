@@ -22,6 +22,15 @@ function getParkingTicket(req, res, next){
     })
 }
 
+function updateParkingTicket(req, res, next){
+    ParkingTicketService.updateParkingTicketStatus(req.params.ticketId,req.params.status)
+    .then(result=>{
+        console.log("Updated Parking ticket ststus Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
+}
+
 function getListOfParkingTicket(req, res, next){
 
     ParkingTicketService.getListOfParkingTicket(req.query.fromDate,req.query.toDate,req.query.page,req.query.limit)
@@ -34,5 +43,5 @@ function getListOfParkingTicket(req, res, next){
 
 
 module.exports = {
-    scanVehicle, getParkingTicket, getListOfParkingTicket
+    scanVehicle, getParkingTicket, getListOfParkingTicket, updateParkingTicket
 }
