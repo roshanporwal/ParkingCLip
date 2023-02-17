@@ -16,7 +16,7 @@ async function generateParkingTicket(payload){
 
         let parkingTicketDb = new ParkingTicketDb({
             ticketId: uuidv4(),
-            vehicleRegistrationNo: "string",
+            vehicleRegistrationNo: payload.vehicleRegistrationNo,
             qrCode: qrcode,
             mobileNo: payload.mobileNo,
             attendantId: attendantDb.attendantId,

@@ -5,6 +5,7 @@ const USER_ROLE = require('../constants/role-constant')
 const UserIdGenerator = require('../utils/user-id-generator')
 const OtpUtility = require('../utils/otp-utility');
 const BusinessDb = require('../database/models/businessDb');
+const RateStructureDb = require('../database/models/rateStructureDb')
 /**
  * 
  * @param {any} business 
@@ -62,6 +63,36 @@ async function getBusinessList(page, limit, user){
     return new ApiResponse(200, "Fetched Business list", null, listData)
 }
 
+async function addRateStructure(payload){
+    let rateStructure = await RateStructureDb.findOne({businessId: payload.businessId, vehicletype: payload.vehicletype})
+    if(rateStructure){
+        delete payload.id
+        rateStructure = await RateStructureDb.findByIdAndUpdate(rateStructure.id,payload)
+        return new ApiResponse(200, "Added Rate Structure Successfully.", null, rateStructure)
+    }
+    else return new ApiResponse(400, 'Invalid Inputs!.', null, null)
+}
+
+async function getRateStructureByBusinessId(businessId,page, limit){
+    const pageOptions = {
+        page: parseInt(page, 10) || 0,
+        limit: parseInt(limit, 10) || 10
+    }
+    const recCount = await RateStructureDb.count({businessId: businessId})
+    if(recCount == 0){
+        return new ApiResponse(400, 'No Data Found, Please Correct Your Inputs!.', null, null)
+    }
+    let rateStructures = await RateStructureDb
+                        .find({businessId: businessId})
+                        .skip(pageOptions.page * pageOptions.limit)
+                        .limit(pageOptions.limit)
+    
+    if(rateStructures){    
+        let listData = {start: page, count: rateStructures.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: rateStructures}
+        return new ApiResponse(200, "Rate Structure Fetched Successfully.", null, listData)
+
+    }
+}
 module.exports={
-    registerBusiness, getBusinessList
+    registerBusiness, getBusinessList, addRateStructure, getRateStructureByBusinessId
 }

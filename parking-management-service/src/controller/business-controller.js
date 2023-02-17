@@ -16,7 +16,7 @@ function createBusiness(req, res, next){
 function getBusinessList(req, res, next){
     BusinessService.getBusinessList(req.query.page, req.query.limit)
         .then(result=>{
-            console.log("Get list of attendant Conroller Result : ",result)
+            console.log("Get list of business Conroller Result : ",result)
             res.status(result.statusCode)
             res.send(result)
         })
@@ -31,7 +31,26 @@ function getBusinessById(req, res, next){
 
 }
 
+function addRateStructure(req, res, next){
+    BusinessService.addRateStructure(req.body)
+        .then(result=>{
+            console.log("Add rate structure Conroller Result : ",result)
+            res.status(result.statusCode)
+            res.send(result)
+        })
+}
+
+
+function getRateStructureByBusinessId(req, res, next){
+    BusinessService.getRateStructureByBusinessId(req.query.businessId,req.query.page, req.query.limit)
+    .then(result=>{
+        console.log("Add rate structure Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
+}
+
 
 module.exports = {
-    createBusiness,getBusinessList, updateBusiness, getBusinessById
+    createBusiness,getBusinessList, updateBusiness, getBusinessById, addRateStructure, updateRateStructure, getRateStructureByBusinessId
 }

@@ -3,8 +3,8 @@ const ApiResponse = require('../utils/api-response')
 const ParkingTicketService = require('../services/parking-service')
 
 function scanVehicle(req, res, next){
-    req.body.file = req.files.file
-    console.log(req.files.file)
+    //req.body.file = req.files.file || null
+    //console.log(req.files.file)
     ParkingTicketService.generateParkingTicket(req.body)
     .then(result=>{
         console.log("Parking ticket generated Conroller Result : ",result)
