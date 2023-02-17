@@ -52,5 +52,5 @@ function getRateStructureByBusinessId(req, res, next){
 
 
 module.exports = {
-    createBusiness,getBusinessList, updateBusiness, getBusinessById, addRateStructure, updateRateStructure, getRateStructureByBusinessId
+    createBusiness,getBusinessList, updateBusiness, getBusinessById, addRateStructure, getRateStructureByBusinessId
 }
