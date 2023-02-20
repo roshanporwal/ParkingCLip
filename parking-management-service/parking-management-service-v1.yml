@@ -162,7 +162,70 @@ paths:
         default:
           $ref: '#/components/responses/ErrorResponse'
   
- 
+  /businesses/rates:
+    post:
+      tags:
+        - businesses
+      operationId: addRateStuctureOfVehicle
+      summary:  Add Rate Structure For Vehicle
+      description: Add Rate Structure For Vehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddRateStructureRequest'
+      responses:
+        '201':
+          description: Rate Structure Added successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  statusCode:
+                    type: number
+                    default: 201
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/AddRateStructureResponse'
+                  description:
+                    type: string
+                
+                
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /businesses/rates/{businessId}:
+    post:
+      tags:
+        - businesses
+      operationId: getRateStuctureListOfVehicle
+      summary:  Add Rate Structure For Vehicle
+      description: Add Rate Structure For Vehicle
+      parameters:
+        - $ref: "#/components/parameters/businessId"
+      responses:
+        '200':
+          description: Rate Structure Added successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  statusCode:
+                    type: number
+                    default: 200
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/ListAddRateStructureResponse'
+                  description:
+                    type: string
+                
+                
+        default:
+          $ref: '#/components/responses/ErrorResponse'        
+  
   /attendants:
     post:
       tags:
@@ -1353,9 +1416,45 @@ components:
         userDetails:
           type: object
     
-    
-   
+    AddRateStructureRequest:
+      type: object
+      properties:
+        vehicleType:
+          type: string
+        chargePerHr:
+          type: number
+        chargePerDay:
+          type: number
+        chargePerWeek:
+          type: number
+        businessId:
+          type: string
+        minimumCharges:
+          type: number
 
+    AddRateStructureResponse:
+      type: object
+      properties:
+        vehicleType:
+          type: string
+        chargePerHr:
+          type: number
+        chargePerDay:
+          type: number
+        chargePerWeek:
+          type: number
+        businessId:
+          type: string
+        minimumCharges:
+          type: number
+   
+    ListAddRateStructureResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AddRateStructureResponse"
           
   responses:
     ErrorResponse:

@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const rateStructureSchema = new Schema({
-    vehicletype: {type: String, required: true},
+    vehicleType: {type: String, required: true},
     chargePerHr: {type: Number, required: true},
     chargePerDay: {type: Number},
     chargePerWeek: {type: Number},

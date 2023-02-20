@@ -64,34 +64,36 @@ async function getBusinessList(page, limit, user){
 }
 
 async function addRateStructure(payload){
-    let rateStructure = await RateStructureDb.findOne({businessId: payload.businessId, vehicletype: payload.vehicletype})
-    if(rateStructure){
-        delete payload.id
-        rateStructure = await RateStructureDb.findByIdAndUpdate(rateStructure.id,payload)
-        return new ApiResponse(200, "Added Rate Structure Successfully.", null, rateStructure)
+    try {
+        let rateStructure = await RateStructureDb.findOne({businessId: payload.businessId, vehicletype: payload.vehicletype})
+        if(rateStructure){
+            delete payload.id
+            rateStructure = await RateStructureDb.findByIdAndUpdate(rateStructure.id,payload)
+            return new ApiResponse(201, "Updated Rate Structure Successfully.", null, rateStructure)
+        }
+        else if (!rateStructure) {
+            rateStructure = new RateStructureDb(payload)
+            rateStructure = await rateStructure.save()
+            return new ApiResponse(201, "Added Rate Structure Successfully.", null, rateStructure)
+        }
+        else return new ApiResponse(400, 'Invalid Inputs!.', null, null)
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Adding Rate Structure!.', null, error.message)
     }
-    else return new ApiResponse(400, 'Invalid Inputs!.', null, null)
 }
 
-async function getRateStructureByBusinessId(businessId,page, limit){
-    const pageOptions = {
-        page: parseInt(page, 10) || 0,
-        limit: parseInt(limit, 10) || 10
-    }
-    const recCount = await RateStructureDb.count({businessId: businessId})
-    if(recCount == 0){
-        return new ApiResponse(400, 'No Data Found, Please Correct Your Inputs!.', null, null)
-    }
-    let rateStructures = await RateStructureDb
-                        .find({businessId: businessId})
-                        .skip(pageOptions.page * pageOptions.limit)
-                        .limit(pageOptions.limit)
-    
-    if(rateStructures){    
-        let listData = {start: page, count: rateStructures.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: rateStructures}
-        return new ApiResponse(200, "Rate Structure Fetched Successfully.", null, listData)
+async function getRateStructureByBusinessId(businessId){
+    try {
+        let rateStructures = await RateStructureDb.find({businessId: businessId})                        
+        if(rateStructures){   
+            return new ApiResponse(200, "Rate Structure Fetched Successfully.", null, rateStructures)
+        }
+        else return new ApiResponse(400, 'Invalid Inputs!.', null, null)   
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Fetching Rate Structure!.', null, error.message)
 
-    }
+    }   
+    
 }
 module.exports={
     registerBusiness, getBusinessList, addRateStructure, getRateStructureByBusinessId

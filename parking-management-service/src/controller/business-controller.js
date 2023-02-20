@@ -42,7 +42,7 @@ function addRateStructure(req, res, next){
 
 
 function getRateStructureByBusinessId(req, res, next){
-    BusinessService.getRateStructureByBusinessId(req.query.businessId,req.query.page, req.query.limit)
+    BusinessService.getRateStructureByBusinessId(req.params.businessId)
     .then(result=>{
         console.log("Add rate structure Conroller Result : ",result)
         res.status(result.statusCode)
