@@ -9,6 +9,7 @@ route.post('/vehicle/scan', parkingController.scanVehicle)
 
 //Get parking ticket
 route.get('/vehicle/ticket/:mobileNo',  parkingController.getParkingTicket)
+route.get('/vehicle/ticketById/:ticketId',  parkingController.getParkingTicketById)
 
 //Get list of parking tickets
 route.get('/vehicle/tickets',  parkingController.getListOfParkingTicket)

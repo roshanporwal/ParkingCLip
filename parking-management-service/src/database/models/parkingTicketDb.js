@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const ticketPaymentDetailsSchema = new Schema({
-
+    parkingCharges: {type: Number}
 })
 
 const parkingTicketScema = new Schema({
@@ -14,9 +14,11 @@ const parkingTicketScema = new Schema({
     attendantName: {type: String, required: true},
     parkingLocation: {type: String, required: true},
     entryDateTime: {type: Date, required: true},
+    exitDateTime:{type: Date},
     vehicleType: {type: String, required: true},
     businessId:{type: String, required: true},
     parkingStatus: {type: String, required: true},
+    isValletApplicable: {type: Boolean, default: false},
     ticketPaymentDetails: ticketPaymentDetailsSchema
     }
 ,{timestamps: true}

@@ -5,6 +5,8 @@ const QRCodeGenerator = require('../utils/qrcode-generator')
 const { count } = require('../database/models/parkingTicketDb')
 const PARKING_STATUS = require('../constants/parking-status')
 const { v4: uuidv4 } = require('uuid');
+const RateStructureDb = require('../database/models/rateStructureDb')
+
 
 async function generateParkingTicket(payload){
     try {
@@ -40,10 +42,11 @@ async function generateParkingTicket(payload){
 }
 
 async function updateParkingTicketStatus(ticketId, status){
-    if(!parkingStatus[status])
+    if(!PARKING_STATUS[status])
         return new ApiResponse(400, 'Parking Ticket Status Is Invalid!', null, null)
     
-    parkingTicketDb = await ParkingTicketDb.findOneAndUpdate({ticketId: ticketId}, {parkingStatus: parkingStatus[status]}, {new: true})
+    parkingTicketDb = await ParkingTicketDb.findOneAndUpdate({ticketId: ticketId}, {parkingStatus: PARKING_STATUS[status] ,
+        exitDateTime:PARKING_STATUS[status] === PARKING_STATUS.EXITED ? new Date(): null}, {new: true})
     
     if(!parkingTicketDb)
         return new ApiResponse(400, 'Parking Ticket Id Is Invalid!', null, null)
@@ -60,6 +63,49 @@ async function getParkingTicket(mobileNo){
         return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
     }
 }
+
+async function getParkingTicketById(ticketId){
+    try {
+        let parkingTicketDb = await ParkingTicketDb.findOne({ticketId: ticketId})   
+        if(!parkingTicketDb)
+            return new ApiResponse(400, 'Invalid Mobile Number!', null, null)
+        parkingTicketDb = await calculateParkingRent(parkingTicketDb)
+        if(parkingTicketDb)    
+            return new ApiResponse(200, 'Parking Ticket Fetched Successfully!', null, parkingTicketDb)    
+        else
+            return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
+
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
+    }
+}
+
+async function calculateParkingRent(parkingTicketDb){
+    try {
+        if(parkingTicketDb.parkingStatus === PARKING_STATUS.PARKED){
+            let rateStructureDb = await RateStructureDb.findOne({businessId: parkingTicketDb.businessId, location: parkingTicketDb.parkingLocation, vehicleType: parkingTicketDb.vehicleType})
+            let rent = rentCalculus(rateStructureDb, parkingTicketDb)
+            parkingTicketDb.ticketPaymentDetails.parkingCharges = rent
+            parkingTicketDb = await ParkingTicketDb.findByIdAndUpdate({_id:parkingTicketDb._id}, {ticketPaymentDetails: parkingTicketDb.ticketPaymentDetails})
+        }
+        return parkingTicketDb    
+    } catch (error) {
+        console.log(error)
+        return null
+    }
+}
+
+function rentCalculus(rateStructureDb, parkingTicketDb){
+    let parkedtimeInHr = (new Date().getTime() - parkingTicketDb.entryDateTime.getTime())/3600000 | 1; //createdAt
+    let rent = rateStructureDb.minimumCharges
+                    +parkingTicketDb.isValletApplicable? rateStructureDb.valletCharges: 0
+                    +(rentPerHr*parkedtimeInHr)
+    //if(new Date().getDay)
+    rent = rateStructureDb.maxCapping && rent > rateStructureDb.maxDailyRent? rateStructureDb.maxDailyRent: rent  
+       
+    return rent;
+}
+
 /**
  * 
  * @param {String} fromDate 
@@ -92,6 +138,11 @@ async function getListOfParkingTicket(fromDate, toDate, page, limit){
     }
 }
 
+
 module.exports={
-    generateParkingTicket, getParkingTicket, getListOfParkingTicket, updateParkingTicketStatus
+    generateParkingTicket, 
+    getParkingTicket, 
+    getListOfParkingTicket, 
+    updateParkingTicketStatus, 
+    getParkingTicketById
 }

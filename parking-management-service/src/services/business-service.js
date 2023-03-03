@@ -65,7 +65,7 @@ async function getBusinessList(page, limit, user){
 
 async function addRateStructure(payload){
     try {
-        let rateStructure = await RateStructureDb.findOne({businessId: payload.businessId, vehicletype: payload.vehicletype})
+        let rateStructure = await RateStructureDb.findOne({businessId: payload.businessId, vehicletype: payload.vehicletype, location: payload.location})
         if(rateStructure){
             delete payload.id
             rateStructure = await RateStructureDb.findByIdAndUpdate(rateStructure.id,payload)
