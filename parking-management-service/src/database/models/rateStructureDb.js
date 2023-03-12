@@ -6,12 +6,13 @@ const rateStructureSchema = new Schema({
     businessId: {type: String, required: true},
     location: {type: String, required: true},
     rentPerHr: {type: Number, required: true},
-    maxDailyRent: {type: Number},
-    valletCharges: {type: Number, default: 0},
     maxCapping: {type: Boolean, default: false},
-    roundingUp: {type: Boolean, default: false},
-    roundingUpTo: {type:Number},
-    minimumCharges: {type: Number, required: true}
+    maxDailyRent: {type: Number},
+    valletCharges: {type: Number, default: 0},    
+    roundingUpTo: {type:Number, default:1},
+    minimumCharges: {type: Number, required: true},
+    isValletApplicable:{type: Boolean},
+    isDayEndMidnight:{type: Boolean, default: false}
 }, {timestamps: true})
 
 const RateStructureDb = mongoose.model('rate-structure', rateStructureSchema)

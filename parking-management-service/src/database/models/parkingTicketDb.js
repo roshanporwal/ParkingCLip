@@ -19,7 +19,9 @@ const parkingTicketScema = new Schema({
     businessId:{type: String, required: true},
     parkingStatus: {type: String, required: true},
     isValletApplicable: {type: Boolean, default: false},
-    ticketPaymentDetails: ticketPaymentDetailsSchema
+    isRentBasis: {Boolean, default: false},
+    ticketPaymentDetails: ticketPaymentDetailsSchema,
+    
     }
 ,{timestamps: true}
 )

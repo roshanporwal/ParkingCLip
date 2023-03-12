@@ -96,14 +96,41 @@ async function calculateParkingRent(parkingTicketDb){
 }
 
 function rentCalculus(rateStructureDb, parkingTicketDb){
-    let parkedtimeInHr = (new Date().getTime() - parkingTicketDb.entryDateTime.getTime())/3600000 | 1; //createdAt
-    let rent = rateStructureDb.minimumCharges
-                    +parkingTicketDb.isValletApplicable? rateStructureDb.valletCharges: 0
-                    +(rentPerHr*parkedtimeInHr)
-    //if(new Date().getDay)
-    rent = rateStructureDb.maxCapping && rent > rateStructureDb.maxDailyRent? rateStructureDb.maxDailyRent: rent  
-       
-    return rent;
+    if(parkingTicketDb.isRentBasis){
+        let parkedtimeInHr = Math.ceil((new Date().getTime() - parkingTicketDb.entryDateTime.getTime())/3600000 | 1); //createdAt
+    
+        let totalRent = 0
+        let dayRent = 0
+        let hrRent = 0
+        let timeInHr = parkedtimeInHr
+        if(!rateStructureDb.isDayEndMidnight && parkedtimeInHr>24 && rateStructureDb.maxCapping){
+            dayRent = Math.floor(parkedtimeInHr/24) * rateStructureDb.maxDailyRent
+            timeInHr = parkedtimeInHr%24
+        } 
+        
+        hrRent = (rateStructureDb.rentPerHr*timeInHr)
+        
+        hrRent = rent < rateStructureDb.minimumCharges ? rateStructureDb.minimumCharges: rent
+        hrRent = rateStructureDb.maxCapping && rent > rateStructureDb.maxDailyRent? rateStructureDb.maxDailyRent: rent  
+        
+        totalRent = dayRent + hrRent + parkingTicketDb.isValletApplicable && rateStructureDb.isValletApplicable ? rateStructureDb.valletCharges :0
+        
+        rent = Math.ceil(totalRent / rateStructureDb.roundingUpTo) * rateStructureDb.roundingUpTo   
+        
+        
+        return {
+            totalRent: totalRent,
+            perHrRent: rateStructureDb.rentPerHr, 
+            valletCharges: parkingTicketDb.isValletApplicable && rateStructureDb.isValletApplicable ? rateStructureDb.valletCharges :0,
+            totalTimeHr: parkedtimeInHr            
+        }
+    }
+    else return {
+        totalRent: rateStructureDb.maxDailyRent        
+    }
+
+
+    
 }
 
 /**
