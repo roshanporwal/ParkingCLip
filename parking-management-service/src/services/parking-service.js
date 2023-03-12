@@ -110,12 +110,12 @@ function rentCalculus(rateStructureDb, parkingTicketDb){
         
         hrRent = (rateStructureDb.rentPerHr*timeInHr)
         
-        hrRent = rent < rateStructureDb.minimumCharges ? rateStructureDb.minimumCharges: rent
-        hrRent = rateStructureDb.maxCapping && rent > rateStructureDb.maxDailyRent? rateStructureDb.maxDailyRent: rent  
+        hrRent = hrRent < rateStructureDb.minimumCharges ? rateStructureDb.minimumCharges: hrRent
+        hrRent = rateStructureDb.maxCapping && hrRent > rateStructureDb.maxDailyRent? rateStructureDb.maxDailyRent: hrRent  
         
         totalRent = dayRent + hrRent + parkingTicketDb.isValletApplicable && rateStructureDb.isValletApplicable ? rateStructureDb.valletCharges :0
         
-        rent = Math.ceil(totalRent / rateStructureDb.roundingUpTo) * rateStructureDb.roundingUpTo   
+        totalRent = Math.ceil(totalRent / rateStructureDb.roundingUpTo) * rateStructureDb.roundingUpTo   
         
         
         return {
