@@ -1,4 +1,5 @@
 const date = require('date-and-time')
+const axios = require('axios')
 
 function generateOTP()
 {
@@ -16,6 +17,11 @@ function generateOTP()
 async function sendOtp(mobileNo, otp){
     console.log("Sending OTP ", otp+" to ", mobileNo)
 
+    let url =`http://otpsms.vision360solutions.in/api/sendhttp.php?authkey=353289A0mspYzcgG6019898eP1&sender=DOCUCL&route=4&country=91&DLT_TE_ID=1207166850734947224&mobiles=${mobileNo}&message=${otp} is your DOCUCLIP login verification code`
+
+    axios.get(url) 
+            .then(res => console.log("Sent OTP :",res.data))
+            .catch(err => console.log("error while sending OTP",err))
 }
 
 module.exports={
