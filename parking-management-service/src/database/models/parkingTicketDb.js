@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const ticketPaymentDetailsSchema = new Schema({
-    parkingCharges: {type: Number}
+    parkingCharges: {type: Object}
 })
 
 const parkingTicketScema = new Schema({
