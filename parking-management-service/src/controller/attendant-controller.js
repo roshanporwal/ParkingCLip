@@ -3,7 +3,7 @@ const ApiResponse = require('../utils/api-response')
 
 function registerAttendant(req, res, next){
     console.log("Controller received request ", req.body);
-    AttendantService.registerAttendant(req.body)
+    AttendantService.registerAttendant(req.body, req.user)
         .then(result=>{
             console.log("Register Attendant Conroller Result : ",result)
             res.status(result.statusCode)
@@ -17,7 +17,7 @@ function loginAttendant(req, res, next){
 }
 
 function getAttendantsList(req, res, next){
-    AttendantService.getAttendantsList(req.query.page, req.query.limit)
+    AttendantService.getAttendantsList(req.query.page, req.query.limit, req.user)
         .then(result=>{
             console.log("Get list of attendant Conroller Result : ",result)
             res.status(result.statusCode)

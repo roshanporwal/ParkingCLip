@@ -5,7 +5,7 @@ const ParkingTicketService = require('../services/parking-service')
 function scanVehicle(req, res, next){
     //req.body.file = req.files.file || null
     //console.log(req.files.file)
-    ParkingTicketService.generateParkingTicket(req.body)
+    ParkingTicketService.generateParkingTicket(req.body, req.user)
     .then(result=>{
         console.log("Parking ticket generated Conroller Result : ",result)
         res.status(result.statusCode)
@@ -43,7 +43,7 @@ function updateParkingTicket(req, res, next){
 
 function getListOfParkingTicket(req, res, next){
 
-    ParkingTicketService.getListOfParkingTicket(req.query.fromDate,req.query.toDate,req.query.page,req.query.limit)
+    ParkingTicketService.getListOfParkingTicket(req.query.fromDate,req.query.toDate,req.query.page,req.query.limit, req.user)
     .then(result=>{
         console.log("Get list of Parking ticket Conroller Result : ",result)
         res.status(result.statusCode)

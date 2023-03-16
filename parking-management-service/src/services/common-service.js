@@ -33,12 +33,12 @@ async function userLogin(loginDetails){
             return new ApiResponse(404, 'User Not registered! Please Signup First.', null, null)
         }else{
             console.log(loginDetails.otp, userDb.otpDetails.code)
-            if(loginDetails.otp !== userDb.otpDetails.code)
-                return new ApiResponse(400, 'Invalid Otp!', null, null)
-            // else if(userDb.otpDetails.validTill < new Date()){
-            //     return new ApiResponse(400, 'Otp Expired!', null, null)
-            // }
-            else{
+            // if(loginDetails.otp !== userDb.otpDetails.code)
+            //     return new ApiResponse(400, 'Invalid Otp!', null, null)
+            // // else if(userDb.otpDetails.validTill < new Date()){
+            // //     return new ApiResponse(400, 'Otp Expired!', null, null)
+            // // }
+            // else{
                 userDb.isActive = true
                 await userDb.save()
                 var userLoginResponse = {}
@@ -48,25 +48,26 @@ async function userLogin(loginDetails){
                         console.log(attendantDb)
                         userLoginResponse.userName = userDb.name    
                         userLoginResponse.userId = userDb.userId
-                        userLoginResponse.BusinessId = attendantDb.business.businessId
-                        userLoginResponse.role = UserRole.ATTENDANT                       
+                        userLoginResponse.businessId = attendantDb.business.businessId
+                        userLoginResponse.role = UserRole.ATTENDANT
+                        userLoginResponse.location = attendantDb.location                       
                         break;
                     case UserRole.BUSINESS_OWNER:
                         userLoginResponse.userName = userDb.name
                         userLoginResponse.userId = userDb.userId
-                        userLoginResponse.BusinessId = userDb.userId
+                        userLoginResponse.businessId = userDb.userId
                         userLoginResponse.role = UserRole.BUSINESS_OWNER                       
                         break;               
                     default:
                         userLoginResponse.userName = "Admin"
                         userLoginResponse.userId = "admin"
-                        userLoginResponse.BusinessId = 'admin'
+                        userLoginResponse.businessId = 'admin'
                         userLoginResponse.role = UserRole.ADMIN
                         break;
                 }
                 return new ApiResponse(200, `User logged in successfully.`, null, userLoginResponse)
 
-            }    
+            //}    
         }    
     } catch (error) {
         return new ApiResponse(500, 'Exception While Fetching Business List!.', null, error.message)

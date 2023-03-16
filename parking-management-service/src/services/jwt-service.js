@@ -9,6 +9,11 @@ function generateJwt(payload){
     })
 }
 
+function decodeJWT(token){
+    var decoded = JWT.verify(token, process.env.JWT_SECRETE);
+    console.log("JWT decoded : ",decoded)
+    return decoded
+}
 module.exports = {
-    generateJwt
+    generateJwt, decodeJWT
 }

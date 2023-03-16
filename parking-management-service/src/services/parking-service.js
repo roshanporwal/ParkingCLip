@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 const RateStructureDb = require('../database/models/rateStructureDb')
 
 
-async function generateParkingTicket(payload){
+async function generateParkingTicket(payload, user){
     try {
         let attendantDb = await AttendantDb.findOne({attendantId: payload.attendantId})
         if(!attendantDb)
@@ -141,9 +141,9 @@ function rentCalculus(rateStructureDb, parkingTicketDb){
  * @param {Number} limit 
  * @returns 
  */
-async function getListOfParkingTicket(fromDate, toDate, page, limit){
+async function getListOfParkingTicket(fromDate, toDate, page, limit, user){
     try {
-        let recCount = await ParkingTicketDb.count()
+        let recCount = await ParkingTicketDb.count({businessId: user.businessId})
         const pageOptions = {
             page: parseInt(page, 10) || 0,
             limit: parseInt(limit, 10) || 10
@@ -152,7 +152,8 @@ async function getListOfParkingTicket(fromDate, toDate, page, limit){
             created_on: {
                 $gte: new Date(fromDate), 
                 $lt: new Date(toDate)
-            }
+            },
+            businessId: user.businessId
         })
         .skip(pageOptions.page * pageOptions.limit)
         .limit(pageOptions.limit)   

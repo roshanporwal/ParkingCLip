@@ -25,6 +25,7 @@ function userLogin(req, res, next){
         if(result.statusCode === 200){
             JwtService.generateJwt(result.data)
                 .then(token=>{
+                    res.setHeader('Access-Control-Expose-Headers','Authorization')
                     res.setHeader('Authorization', 'Bearer '+ token)
                     res.status(result.statusCode)
                     res.send(result)

@@ -28,7 +28,7 @@ async function registerAttendant(attendant, user){
     
     try {
         await userDb.save()
-        await OtpUtility.sendOtp(userDb.mobileNo, userDb.otpDetails.code)
+        //await OtpUtility.sendOtp(userDb.mobileNo, userDb.otpDetails.code)
         result = await attendantDb.save()
         //convert result to API data          
         return new ApiResponse(201, 'Attendant Registed.', null, result)    
@@ -50,8 +50,8 @@ async function getAttendantsList(page, limit, user){
         limit: parseInt(limit, 10) || 10
     }
     try {
-        var recCount = await AttendantDb.count()
-        result = await AttendantDb.find()
+        var recCount = await AttendantDb.countDocuments({'business.businessId': user.businessId})
+        result = await AttendantDb.find({'business.businessId': user.businessId})
         .skip(pageOptions.page * pageOptions.limit)
         .limit(pageOptions.limit)
     } catch (error) {

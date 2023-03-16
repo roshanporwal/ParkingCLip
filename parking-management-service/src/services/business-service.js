@@ -28,7 +28,7 @@ async function registerBusiness(business, user){
     const businessDb = new BusinessDb(business)
     try {
         await userDb.save()
-        await OtpUtility.sendOtp(userDb.mobileNo, userDb.otpDetails.code)
+        //await OtpUtility.sendOtp(userDb.mobileNo, userDb.otpDetails.code)
         result = await businessDb.save()
         //convert result to API data          
         return new ApiResponse(201, 'Business Registered.', null, result)    

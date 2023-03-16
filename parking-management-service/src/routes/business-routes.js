@@ -1,6 +1,7 @@
 const express = require('express');
 
 const route = express.Router()
+const RouteSecurity = require('../services/route-security-service')
 
 const businessController = require('../controller/business-controller')
 
@@ -8,19 +9,19 @@ const businessController = require('../controller/business-controller')
 route.post('/',  businessController.createBusiness)
 
 //Get list of businesses
-route.get('/',  businessController.getBusinessList)
+route.get('/', RouteSecurity.autherizeRouteForBusinessUser, businessController.getBusinessList)
 
 //update business
-route.put('/:businessId',  businessController.updateBusiness)
+route.put('/:businessId', RouteSecurity.autherizeRouteForBusinessUser, businessController.updateBusiness)
 
 //Get business by id
-route.get('/:businessId',  businessController.getBusinessById)
+route.get('/:businessId', RouteSecurity.autherizeRouteForBusinessUser, businessController.getBusinessById)
 
 //Add Rate Structure
-route.post('/rates',  businessController.addRateStructure)
+route.post('/rates', RouteSecurity.autherizeRouteForBusinessUser, businessController.addRateStructure)
 
 //Get Rate Structure list
-route.get('/rates/:businessId',  businessController.getRateStructureByBusinessId)
+route.get('/rates/:businessId', RouteSecurity.autherizeRouteForBusinessUser, businessController.getRateStructureByBusinessId)
 
 
 
