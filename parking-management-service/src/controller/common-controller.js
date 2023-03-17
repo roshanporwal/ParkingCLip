@@ -44,8 +44,29 @@ function userLogin(req, res, next){
     })
 
 }
-
+function getUserInfo(req, res, next){
+    console.log("Request recive in controller to get User info")
+    try {
+        const jwt = (req.headers['Authorization'] || req.headers['authorization'])? (req.headers['Authorization'] || req.headers['authorization']).split(' ')[1] : null;
+        if(!jwt){
+            res.status(401)
+            res.send(new ApiResponse(401, `No access token found in request!`, null, null))            
+        }
+        let userDetails = JwtService.decodeJWT(jwt);
+        if(!userDetails){
+            res.status(400)
+            res.send(new ApiResponse(401, `Invalid access token found in request!`, null, null))
+        }else{
+            res.status(200)
+            res.send(new ApiResponse(200, `User details fetched successfully.`, null, userDetails))
+        }    
+    } catch (error) {
+        res.status(500)
+        res.send(new ApiResponse(500, `Server error!`, error, null))
+    }
+        
+}
 module.exports={
-    uploadAttendantPhoto, generateOtp, userLogin
+    uploadAttendantPhoto, generateOtp, userLogin, getUserInfo
 }
 

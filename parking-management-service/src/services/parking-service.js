@@ -6,20 +6,17 @@ const { count } = require('../database/models/parkingTicketDb')
 const PARKING_STATUS = require('../constants/parking-status')
 const { v4: uuidv4 } = require('uuid');
 const RateStructureDb = require('../database/models/rateStructureDb')
-
+const VehicleDetailsDb = require('../database/models/vehicleDetailsDb')
 
 async function generateParkingTicket(payload, user){
     try {
         let attendantDb = await AttendantDb.findOne({attendantId: payload.attendantId})
         if(!attendantDb)
-            return new ApiResponse(400, 'Invalid Attendant!', null, null)
-
-        let qrcode = await QRCodeGenerator.generateQrcode(payload.mobileNo,"string")
-
+            return new ApiResponse(400, 'Invalid Attendant!', null, null)        
+        await registerVehicle({vehicleRegistrationNo: payload.vehicleRegistrationNo, mobileNo: payload.mobileNo, vehicleType: payload.vehicleType})
         let parkingTicketDb = new ParkingTicketDb({
-            ticketId: uuidv4(),
+            ticketId: Math.random().toString(36).slice(5).toUpperCase(),
             vehicleRegistrationNo: payload.vehicleRegistrationNo,
-            qrCode: qrcode,
             mobileNo: payload.mobileNo,
             attendantId: attendantDb.attendantId,
             attendantName: `${attendantDb.firstName} ${attendantDb.middleName} ${attendantDb.lastName}`,
@@ -31,7 +28,8 @@ async function generateParkingTicket(payload, user){
             ticketPaymentDetails: {}
 
         })
-        
+        let qrcode = await QRCodeGenerator.generateQrcode(parkingTicketDb)
+        parkingTicketDb.qrCode = qrcode
         parkingTicketDb = await parkingTicketDb.save()
         //send SMS to vehicle owner
         return new ApiResponse(201, 'Parking Ticket Generated Successfully!', null, parkingTicketDb)    
@@ -40,7 +38,7 @@ async function generateParkingTicket(payload, user){
         return new ApiResponse(500, 'Exception While generating Parking ticket!.', null, error.message)
     }    
 }
-
+//TODO: restrict the access here
 async function updateParkingTicketStatus(ticketId, status){
     if(!PARKING_STATUS[status])
         return new ApiResponse(400, 'Parking Ticket Status Is Invalid!', null, null)
@@ -63,12 +61,12 @@ async function getParkingTicket(mobileNo){
         return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
     }
 }
-
+//TODO: Restrict the access here
 async function getParkingTicketById(ticketId){
     try {
         let parkingTicketDb = await ParkingTicketDb.findOne({ticketId: ticketId})   
         if(!parkingTicketDb)
-            return new ApiResponse(400, 'Invalid Mobile Number!', null, null)
+            return new ApiResponse(400, 'Invalid ticketId!', null, null)
         parkingTicketDb = await calculateParkingRent(parkingTicketDb)
         if(parkingTicketDb)    
             return new ApiResponse(200, 'Parking Ticket Fetched Successfully!', null, parkingTicketDb)    
@@ -158,19 +156,34 @@ async function getListOfParkingTicket(fromDate, toDate, page, limit, user){
         .skip(pageOptions.page * pageOptions.limit)
         .limit(pageOptions.limit)   
         if(!parkingTicketDb)
-            return new ApiResponse(400, 'Invalid Mobile Number!', null, null)
+            return new ApiResponse(400, 'No Records Found!', null, null)
+        
         let listData = {start: page, count: parkingTicketDb.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: parkingTicketDb}     
         return new ApiResponse(200, 'Parking Ticket Fetched Successfully!', null, listData)    
     } catch (error) {
         return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
     }
 }
-
+ async function registerVehicle(payload){
+    try{
+        let vehicle = await VehicleDetailsDb.findOne({vehicleRegistrationNo: payload.vehicleRegistrationNo, mobileNo: payload.mobileNo, vehicleType: payload.vehicleType})
+        if(!vehicle){
+            payload.qrCode = await QRCodeGenerator.generateQrcode(payload)
+            vehicle = new VehicleDetailsDb(payload)
+            vehicle = await vehicle.save()
+            //TODO: need to send QR code to vehicle owner
+        }
+        return new ApiResponse(200, 'Vehicle registered Successfully!', null, vehicle)
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Registering vehicle!.', null, error.message)
+    }
+ }
 
 module.exports={
     generateParkingTicket, 
     getParkingTicket, 
     getListOfParkingTicket, 
     updateParkingTicketStatus, 
-    getParkingTicketById
+    getParkingTicketById,
+    registerVehicle
 }

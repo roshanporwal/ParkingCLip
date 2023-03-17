@@ -51,7 +51,21 @@ function getListOfParkingTicket(req, res, next){
     })
 }
 
+function registerVehicle(req, res, next){
+    console.log("Register Vehicle request : ", req.body)
+    ParkingTicketService.registerVehicle(req.body)
+    .then(result=>{
+        console.log("Register vehicle Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
+}
 
 module.exports = {
-    scanVehicle, getParkingTicket, getListOfParkingTicket, updateParkingTicket, getParkingTicketById
+    scanVehicle, 
+    getParkingTicket, 
+    getListOfParkingTicket, 
+    updateParkingTicket, 
+    getParkingTicketById, 
+    registerVehicle
 }

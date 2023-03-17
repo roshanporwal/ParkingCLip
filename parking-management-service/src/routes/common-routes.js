@@ -9,6 +9,7 @@ route.get('/otp/generate/:mobileNo', CommonController.generateOtp)
 
 route.post('/login', CommonController.userLogin)
 
+route.get('/userInfo', CommonController.getUserInfo)
 
 
 

@@ -16,7 +16,7 @@ function autherizeRouteForAttendant(req, res, next){
 
 function authUserRole(req, res, next, ...roles){
     try {
-        const jwt = (req.headers['Authorization'] || req.headers['authorization']).split(' ')[1] || null;
+        const jwt = (req.headers['Authorization'] || req.headers['authorization'])? (req.headers['Authorization'] || req.headers['authorization']).split(' ')[1] : null;
         if(!jwt){
             res.status(401)
             res.send(new ApiResponse(401, `Authentication failed!`, null, null))
