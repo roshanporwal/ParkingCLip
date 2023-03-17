@@ -5,7 +5,7 @@ const route = express.Router()
 const parkingController = require('../controller/parking-controller')
 const RouteSecurity = require('../services/route-security-service')
 //scan vehicle
-route.post('/vehicle/generaTicket', parkingController.scanVehicle)
+route.post('/vehicle/generateTicket', parkingController.scanVehicle)
 
 //Get parking ticket
 route.get('/vehicle/ticket/:mobileNo', RouteSecurity.autherizeRouteForAttendant, parkingController.getParkingTicket)
