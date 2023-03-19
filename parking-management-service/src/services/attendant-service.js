@@ -13,7 +13,10 @@ const OtpUtility = require('../utils/otp-utility')
 async function registerAttendant(attendant, user){
     console.log("Service received request ", attendant);
     //TODO: valiudate and proccess the request
-    
+    let attendantDbExist = await UserDb.findOne({mobileNo: attendant.mobileNo})
+    if(attendantDbExist){
+        return new ApiResponse(400, 'Attendant Is Already Registed With Provided Mobile No.', null, null)
+    }
     const userDb = new UserDb({
         mobileNo: attendant.mobileNo,
         name: `${attendant.firstName} ${attendant.middleName} ${attendant.lastName}`,

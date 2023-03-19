@@ -15,7 +15,10 @@ const RateStructureDb = require('../database/models/rateStructureDb')
 async function registerBusiness(business, user){
     console.log("Service received request for business registration ", business);
     //TODO: evaluate and process the request
-    
+    let businessDbExist = await UserDb.findOne({mobileNo: business.businessContactNo})
+    if(businessDbExist){
+        return new ApiResponse(400, 'Business Is Already Registered With Provided Business Contact No.', null, null)
+    }
     const userDb = new UserDb({
         mobileNo: business.businessContactNo ,
         name: business.businessName,

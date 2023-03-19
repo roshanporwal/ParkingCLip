@@ -24,11 +24,24 @@ async function generateParkingTicket(payload, user){
             entryDateTime: new Date(),
             vehicleType: payload.vehicleType,
             businessId: attendantDb.business.businessId,
+            businessName: attendantDb.business.businessName,
             parkingStatus: PARKING_STATUS.PARKED,
             ticketPaymentDetails: {}
 
         })
-        let qrcode = await QRCodeGenerator.generateQrcode(parkingTicketDb)
+        let qrcode = await QRCodeGenerator.generateQrcode({
+            ticketId: parkingTicketDb.ticketId,
+            vehicleRegistrationNo: payload.vehicleRegistrationNo,
+            mobileNo: payload.mobileNo,
+            attendantId: attendantDb.attendantId,
+            attendantName: `${attendantDb.firstName} ${attendantDb.middleName} ${attendantDb.lastName}`,
+            parkingLocation: attendantDb.location,
+            entryDateTime: parkingTicketDb.entryDateTime,
+            vehicleType: payload.vehicleType,
+            businessId: attendantDb.business.businessId,
+            businessName: attendantDb.business.businessName,
+            parkingStatus: PARKING_STATUS.PARKED
+        })
         parkingTicketDb.qrCode = qrcode
         parkingTicketDb = await parkingTicketDb.save()
         //send SMS to vehicle owner
@@ -44,7 +57,7 @@ async function updateParkingTicketStatus(ticketId, status){
         return new ApiResponse(400, 'Parking Ticket Status Is Invalid!', null, null)
     
     parkingTicketDb = await ParkingTicketDb.findOneAndUpdate({ticketId: ticketId}, {parkingStatus: PARKING_STATUS[status] ,
-        exitDateTime:PARKING_STATUS[status] === PARKING_STATUS.EXITED ? new Date(): null}, {new: true})
+    exitDateTime:PARKING_STATUS[status] === PARKING_STATUS.EXITED ? new Date(): null}, {new: true})
     
     if(!parkingTicketDb)
         return new ApiResponse(400, 'Parking Ticket Id Is Invalid!', null, null)
@@ -67,7 +80,16 @@ async function getParkingTicketById(ticketId){
         let parkingTicketDb = await ParkingTicketDb.findOne({ticketId: ticketId})   
         if(!parkingTicketDb)
             return new ApiResponse(400, 'Invalid ticketId!', null, null)
-        parkingTicketDb = await calculateParkingRent(parkingTicketDb)
+        if(parkingTicketDb.parkingStatus === PARKING_STATUS.PARKED){
+            let rateStructureDb = await RateStructureDb.findOne({businessId: parkingTicketDb.businessId, location: parkingTicketDb.parkingLocation, vehicleType: parkingTicketDb.vehicleType})
+            if(!rateStructureDb){
+                return new ApiResponse(400, 'Rate Structure Is Not Define!', null, null)
+            }
+            let rent = rentCalculus(rateStructureDb, parkingTicketDb)
+            parkingTicketDb.ticketPaymentDetails.parkingCharges = rent
+            parkingTicketDb = await ParkingTicketDb.findByIdAndUpdate({_id:parkingTicketDb._id}, {ticketPaymentDetails: parkingTicketDb.ticketPaymentDetails}, {new: true})
+        }
+        //parkingTicketDb = await calculateParkingRent(parkingTicketDb)
         if(parkingTicketDb)    
             return new ApiResponse(200, 'Parking Ticket Fetched Successfully!', null, parkingTicketDb)    
         else
@@ -78,20 +100,20 @@ async function getParkingTicketById(ticketId){
     }
 }
 
-async function calculateParkingRent(parkingTicketDb){
-    try {
-        if(parkingTicketDb.parkingStatus === PARKING_STATUS.PARKED){
-            let rateStructureDb = await RateStructureDb.findOne({businessId: parkingTicketDb.businessId, location: parkingTicketDb.parkingLocation, vehicleType: parkingTicketDb.vehicleType})
-            let rent = rentCalculus(rateStructureDb, parkingTicketDb)
-            parkingTicketDb.ticketPaymentDetails.parkingCharges = rent
-            parkingTicketDb = await ParkingTicketDb.findByIdAndUpdate({_id:parkingTicketDb._id}, {ticketPaymentDetails: parkingTicketDb.ticketPaymentDetails})
-        }
-        return parkingTicketDb    
-    } catch (error) {
-        console.log(error)
-        return null
-    }
-}
+// async function calculateParkingRent(parkingTicketDb){
+//     try {
+//         if(parkingTicketDb.parkingStatus === PARKING_STATUS.PARKED){
+//             let rateStructureDb = await RateStructureDb.findOne({businessId: parkingTicketDb.businessId, location: parkingTicketDb.parkingLocation, vehicleType: parkingTicketDb.vehicleType})
+//             let rent = rentCalculus(rateStructureDb, parkingTicketDb)
+//             parkingTicketDb.ticketPaymentDetails.parkingCharges = rent
+//             parkingTicketDb = await ParkingTicketDb.findByIdAndUpdate({_id:parkingTicketDb._id}, {ticketPaymentDetails: parkingTicketDb.ticketPaymentDetails})
+//         }
+//         return parkingTicketDb    
+//     } catch (error) {
+//         console.log(error)
+//         return null
+//     }
+// }
 
 function rentCalculus(rateStructureDb, parkingTicketDb){
     if(parkingTicketDb.isRentBasis){
@@ -111,7 +133,7 @@ function rentCalculus(rateStructureDb, parkingTicketDb){
         hrRent = hrRent < rateStructureDb.minimumCharges ? rateStructureDb.minimumCharges: hrRent
         hrRent = rateStructureDb.maxCapping && hrRent > rateStructureDb.maxDailyRent? rateStructureDb.maxDailyRent: hrRent  
         
-        totalRent = dayRent + hrRent + parkingTicketDb.isValletApplicable && rateStructureDb.isValletApplicable ? rateStructureDb.valletCharges :0
+        totalRent = (dayRent + hrRent) + (parkingTicketDb.isValletApplicable && rateStructureDb.isValletApplicable ? rateStructureDb.valletCharges :0)
         
         totalRent = Math.ceil(totalRent / rateStructureDb.roundingUpTo) * rateStructureDb.roundingUpTo   
         

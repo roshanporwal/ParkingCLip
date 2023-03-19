@@ -11,6 +11,9 @@ route.post('/login', CommonController.userLogin)
 
 route.get('/userInfo', CommonController.getUserInfo)
 
+route.get('/user/ticket/:ticketId', CommonController.getUserParkingTicket)
+
+
 
 
 

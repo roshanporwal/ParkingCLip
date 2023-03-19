@@ -1,6 +1,7 @@
 const ApiResponse = require('../utils/api-response')
 const CommonService = require('../services/common-service')
 const JwtService = require('../services/jwt-service')
+const ParkingTicketService = require('../services/parking-service')
 
 function uploadAttendantPhoto(req, res, next){
     res.send()
@@ -66,7 +67,18 @@ function getUserInfo(req, res, next){
     }
         
 }
+
+function getUserParkingTicket(req, res, next){
+    console.log("Request recived in controller to get user parking ticket")
+    ParkingTicketService.getParkingTicketById(req.params.ticketId)
+    .then(result=>{
+        console.log("get user parking ticket Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
+}
+
 module.exports={
-    uploadAttendantPhoto, generateOtp, userLogin, getUserInfo
+    uploadAttendantPhoto, generateOtp, userLogin, getUserInfo, getUserParkingTicket
 }
 
