@@ -24,11 +24,21 @@ function getBusinessList(req, res, next){
 }
 
 function updateBusiness(req, res, next){
-
+    BusinessService.updateBusiness(req.params.businessId, req.body,req.user)
+        .then(result=>{
+            console.log("Update business Conroller Result : ",result)
+            res.status(result.statusCode)
+            res.send(result)
+        })
 }
 
 function getBusinessById(req, res, next){
-
+    BusinessService.getBusinessById(req.params.businessId, req.user)
+        .then(result=>{
+            console.log("Get business by id Conroller Result : ",result)
+            res.status(result.statusCode)
+            res.send(result)
+        })
 }
 
 function addRateStructure(req, res, next){

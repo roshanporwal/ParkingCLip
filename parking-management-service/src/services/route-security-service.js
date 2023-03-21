@@ -1,10 +1,9 @@
 const JwtService = require('./jwt-service')
 const UserRole = require('../constants/role-constant')
 const ApiResponse = require('../utils/api-response')
-const { use } = require('../routes/business-routes')
 
-function autherizeRouteForBusinessUser(req, res, next){
-    authUserRole(req, res, next, UserRole.BUSINESS_OWNER)    
+function autherizeRouteForAdminUser(req, res, next){
+    authUserRole(req, res, next, UserRole.ADMIN)    
 }
 function autherizeRouteForBusinessUser(req, res, next){
     authUserRole(req, res, next, [UserRole.BUSINESS_OWNER,UserRole.ADMIN])    
@@ -36,5 +35,5 @@ function authUserRole(req, res, next, ...roles){
     }
 }
 module.exports={
-    autherizeRouteForBusinessUser, autherizeRouteForAttendant
+    autherizeRouteForBusinessUser, autherizeRouteForAttendant, autherizeRouteForAdminUser
 }

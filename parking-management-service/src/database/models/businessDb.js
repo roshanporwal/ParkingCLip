@@ -1,6 +1,10 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
+const businessLocationSchema = new Schema({
+    name:{type: String},
+    address:{type: String}
+})
 
 const businessSchema = new Schema({
     businessId: {type: String, required: true},
@@ -17,7 +21,9 @@ const businessSchema = new Schema({
     businessEmailId: {type: String, required: true},
     personalEmailId: {type: String, required: true},
     gstNo: {type: String, required: true},
-    pancardNo: {type: String, required: true}
+    pancardNo: {type: String, required: true},
+    locations: {type: [businessLocationSchema], required: true}
+
 } ,{timestamps: true})
 
 const BusinessDb = mongoose.model('business', businessSchema)

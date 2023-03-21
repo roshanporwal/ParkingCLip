@@ -15,7 +15,7 @@ route.get('/', RouteSecurity.autherizeRouteForBusinessUser, businessController.g
 route.put('/:businessId', RouteSecurity.autherizeRouteForBusinessUser, businessController.updateBusiness)
 
 //Get business by id
-route.get('/:businessId', RouteSecurity.autherizeRouteForBusinessUser, businessController.getBusinessById)
+route.get('/:businessId', RouteSecurity.autherizeRouteForAttendant, businessController.getBusinessById)
 
 //Add Rate Structure
 route.post('/rates', RouteSecurity.autherizeRouteForBusinessUser, businessController.addRateStructure)

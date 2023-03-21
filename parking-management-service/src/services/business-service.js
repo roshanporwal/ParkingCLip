@@ -98,6 +98,30 @@ async function getRateStructureByBusinessId(businessId){
     }   
     
 }
+async function getBusinessById(businessId, user){
+    try {
+        let businessDb = await BusinessDb.findOne({businessId: businessId})
+        if(businessDb){
+            return new ApiResponse(200, "Business Fetched Successfully.", null, businessDb)
+        }else return new ApiResponse(400, 'Invalid Business Id!.', null, null)
+    }catch(error){
+        return new ApiResponse(500, 'Exception While Fetching Business!.', null, error.message)
+    }
+}
+
+async function updateBusiness(businessId, payload, user){
+    try {
+        let businessDb = await BusinessDb.findOne({businessId: businessId})
+        if(businessDb){
+            delete payload._id
+            payload.businessId = businessId
+            businessDb = await BusinessDb.findByIdAndUpdate({_id: businessDb._id},payload, {new: true})
+            return new ApiResponse(200, "Business Updated Successfully.", null, businessDb)
+        }else return new ApiResponse(400, 'Invalid Business Id!.', null, null)
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Updating Business!.', null, error.message)
+    }
+}
 module.exports={
-    registerBusiness, getBusinessList, addRateStructure, getRateStructureByBusinessId
+    registerBusiness, getBusinessList, addRateStructure, getRateStructureByBusinessId, getBusinessById, updateBusiness
 }
