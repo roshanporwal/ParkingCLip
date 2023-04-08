@@ -22,8 +22,8 @@ async function registerAttendant(attendant, user){
         name: `${attendant.firstName} ${attendant.middleName} ${attendant.lastName}`,
         role: USER_ROLE.ATTENDANT,
         userId: UserIdGenerator.getNextUserId(),
-        isActive: false,
-        otpDetails: OtpUtility.generateOTP()
+        isActive: true,
+        otpDetails: OtpUtility.generateOTP()        
     })
     attendant.attendantId = userDb.userId
     attendant.isOnDuty = true

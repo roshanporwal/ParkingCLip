@@ -9,7 +9,7 @@ const businessController = require('../controller/business-controller')
 route.post('/',  businessController.createBusiness)
 
 //Get list of businesses
-route.get('/', RouteSecurity.autherizeRouteForBusinessUser, businessController.getBusinessList)
+route.get('/', RouteSecurity.autherizeRouteForAdminUser, businessController.getBusinessList)
 
 //update business
 route.put('/:businessId', RouteSecurity.autherizeRouteForBusinessUser, businessController.updateBusiness)

@@ -78,7 +78,27 @@ function getUserParkingTicket(req, res, next){
     })
 }
 
+function activateOrDeactivateUser(req, res, next){
+    
+    CommonService.activateOrDeactivateUser(req.params.userId, req.params.status)
+    .then(result=>{
+        console.log("Activate Or Deactivate user Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
+}
+
+function getUsersByRole(req, res, next){
+    
+    CommonService.getUsersByRole(req.params.role)
+    .then(result=>{
+        console.log("getUsersByRole Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
+}
+
 module.exports={
-    uploadAttendantPhoto, generateOtp, userLogin, getUserInfo, getUserParkingTicket
+    uploadAttendantPhoto, generateOtp, userLogin, getUserInfo, getUserParkingTicket, activateOrDeactivateUser, getUsersByRole
 }
 

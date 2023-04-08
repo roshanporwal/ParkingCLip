@@ -7,6 +7,9 @@ const PARKING_STATUS = require('../constants/parking-status')
 const { v4: uuidv4 } = require('uuid');
 const RateStructureDb = require('../database/models/rateStructureDb')
 const VehicleDetailsDb = require('../database/models/vehicleDetailsDb')
+const SmsService = require('../utils/sms-utility')
+const UserRole = require('../constants/role-constant')
+
 
 async function generateParkingTicket(payload, user){
     try {
@@ -45,6 +48,7 @@ async function generateParkingTicket(payload, user){
         parkingTicketDb.qrCode = qrcode
         parkingTicketDb = await parkingTicketDb.save()
         //send SMS to vehicle owner
+        await SmsService.sendMessage(payload.mobileNo, `Thanks for prarking. Get ticket detaile ${process.env.SERVER_URL}/parkings/vehicle/ticketById/${parkingTicketDb.ticketId}`)
         return new ApiResponse(201, 'Parking Ticket Generated Successfully!', null, parkingTicketDb)    
     } catch (error) {
         console.log("Error ",error.message)
@@ -161,23 +165,31 @@ function rentCalculus(rateStructureDb, parkingTicketDb){
  * @param {Number} limit 
  * @returns 
  */
-async function getListOfParkingTicket(fromDate, toDate, page, limit, user){
+async function getListOfParkingTicket(fromDate, toDate, page, limit, user, location = null){
     try {
-        let recCount = await ParkingTicketDb.count({businessId: user.businessId})
+        
+        if(user.role == UserRole.BUSINESS_OWNER && !location)
+            return new ApiResponse(400, 'Location is required!', null, null)
+
+        let filter = [{businessId:{ $eq:user.businessId}},{parkingLocation:{$eq : location? location: user.location}}]    
+        let recCount = await ParkingTicketDb.count({businessId:{ $eq:user.businessId}, parkingLocation:{$eq : location? location: user.location}})
         const pageOptions = {
             page: parseInt(page, 10) || 0,
             limit: parseInt(limit, 10) || 10
-        }
-        let parkingTicketDb = await ParkingTicketDb.find({
-            created_on: {
+        }    
+    
+        
+        if(fromDate && toDate){
+            filter.push({created_on: {
                 $gte: new Date(fromDate), 
                 $lt: new Date(toDate)
-            },
-            businessId: user.businessId
-        })
-        .skip(pageOptions.page * pageOptions.limit)
-        .limit(pageOptions.limit)   
-        if(!parkingTicketDb)
+            }})
+        }    
+        let parkingTicketDb = await ParkingTicketDb.find({ $and: filter })
+                                                    .skip(pageOptions.page * pageOptions.limit)
+                                                    .limit(pageOptions.limit)   
+        
+        if(!parkingTicketDb || parkingTicketDb.length == 0)
             return new ApiResponse(400, 'No Records Found!', null, null)
         
         let listData = {start: page, count: parkingTicketDb.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: parkingTicketDb}     
