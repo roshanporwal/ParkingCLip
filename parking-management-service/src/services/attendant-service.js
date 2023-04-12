@@ -95,6 +95,7 @@ async function getAttendantById(attendantId, user){
 async function deleteAttendantById(attendantId, user){
     try {
         await AttendantDb.deleteOne({attendantId:{$eq: attendantId}, 'business.businessId':{$eq: user.businessId}})
+        await UserDb.deleteOne({userId:{$eq: attendantId}})
         return new ApiResponse(200, "Attendant Deleted Successfully.", null, null)  
     } catch (error) {
         return new ApiResponse(500, 'Exception While Deleting Attendant !.', null, error)
