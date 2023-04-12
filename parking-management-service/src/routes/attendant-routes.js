@@ -12,13 +12,16 @@ route.post('/', RouteSecurity.autherizeRouteForAttendant, attendantController.re
 route.post('/login',  attendantController.loginAttendant)
 
 //get list of attendants
-route.get('/', RouteSecurity.autherizeRouteForAttendant, attendantController.getAttendantsList)
+route.get('/', RouteSecurity.autherizeRouteForBusinessUser, attendantController.getAttendantsList)
 
 //update attendant
-route.put('/:attendantId', RouteSecurity.autherizeRouteForAttendant, attendantController.updateAttendant)
+route.put('/:attendantId', RouteSecurity.autherizeRouteForBusinessUser, attendantController.updateAttendant)
 
 //get attendant by Id
-route.get('/:attendantId', RouteSecurity.autherizeRouteForAttendant, attendantController.getAttendantById)
+route.get('/:attendantId', RouteSecurity.autherizeRouteForBusinessUser, attendantController.getAttendantById)
+
+//delete attendant by Id
+route.delete('/:attendantId', RouteSecurity.autherizeRouteForBusinessUser, attendantController.deleteAttendantById)
 
 
 module.exports = route

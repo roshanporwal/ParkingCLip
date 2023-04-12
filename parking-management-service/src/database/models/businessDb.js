@@ -3,7 +3,11 @@ const Schema = mongoose.Schema
 
 const businessLocationSchema = new Schema({
     name:{type: String},
-    address:{type: String}
+    address:{type: String},
+    gpsCords:{type: String},
+    locationType: {type: String},
+    vehicleDetails: {type: [Object]}
+    
 })
 
 const businessSchema = new Schema({

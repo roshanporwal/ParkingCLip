@@ -27,14 +27,32 @@ function getAttendantsList(req, res, next){
 }
 
 function updateAttendant(req, res, next){
-
+    AttendantService.updateAttendant(req.params.attendantId,req.body, req.user)
+        .then(result=>{
+            console.log("Update Attendant Conroller Result : ",result)
+            res.status(result.statusCode)
+            res.send(result)
+        })
 }
 
 function getAttendantById(req, res, next){
-
+    AttendantService.getAttendantById(req.params.attendantId, req.user)
+    .then(result=>{
+        console.log("Get Attendant by Id Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
 }
 
+function deleteAttendantById(req, res, next){
+    AttendantService.deleteAttendantById(req.params.attendantId, req.user)
+    .then(result=>{
+        console.log("Delete Attendant Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
+}
 
 module.exports = {
-    registerAttendant, loginAttendant, getAttendantsList, updateAttendant, getAttendantById
+    registerAttendant, loginAttendant, getAttendantsList, updateAttendant, getAttendantById, deleteAttendantById
 }

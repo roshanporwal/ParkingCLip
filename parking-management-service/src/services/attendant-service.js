@@ -65,6 +65,42 @@ async function getAttendantsList(page, limit, user){
     return new ApiResponse(200, "Fetched Attendant list", null, listData)
 }
 
+async function updateAttendant(attendantId, payload, user){
+    try {
+        let attendant = await AttendantDb.findOne({attendantId:{$eq: attendantId}, 'business.businessId':{$eq: user.businessId}})
+        if(!attendant)
+            return new ApiResponse(400, 'Attendant not found for update.', null, null)
+        payload.attendantId = attendantId
+        delete payload._id
+
+        await AttendantDb.findOneAndUpdate({_id:attendant._id}, payload)
+        return new ApiResponse(200, "Attendant Updated Successfully.", null, payload)  
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While updating Attendant !.', null, error)
+    }
+}
+
+async function getAttendantById(attendantId, user){
+    try {
+        let attendant = await AttendantDb.findOne({attendantId:{$eq: attendantId}, 'business.businessId':{$eq: user.businessId}})
+        if(!attendant)
+            return new ApiResponse(400, 'Attendant not found for update.', null, null)
+        
+        return new ApiResponse(200, "Attendant fetched Successfully.", null, attendant)  
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While updating Attendant !.', null, error)
+    }
+}
+
+async function deleteAttendantById(attendantId, user){
+    try {
+        await AttendantDb.deleteOne({attendantId:{$eq: attendantId}, 'business.businessId':{$eq: user.businessId}})
+        return new ApiResponse(200, "Attendant Deleted Successfully.", null, null)  
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Deleting Attendant !.', null, error)
+    }
+}
+
 module.exports={
-    registerAttendant, getAttendantsList
+    registerAttendant, getAttendantsList, updateAttendant, getAttendantById, deleteAttendantById
 }

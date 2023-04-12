@@ -21,6 +21,9 @@ route.put('/users/activateOrdeactivate/:userId/:status', RouteSecurity.autherize
 //Get user by role
 route.get('/users/:role', RouteSecurity.autherizeRouteForAdminUser, CommonController.getUsersByRole)
 
+//Get all parking  tickets by business and location
+route.get('/tickets/:businessId', RouteSecurity.autherizeRouteForAdminUser, CommonController.getParkingTickets) 
+
 
 
 

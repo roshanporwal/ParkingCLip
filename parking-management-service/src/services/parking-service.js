@@ -173,6 +173,8 @@ async function getListOfParkingTicket(fromDate, toDate, page, limit, user, locat
 
         let filter = [{businessId:{ $eq:user.businessId}},{parkingLocation:{$eq : location? location: user.location}}]    
         let recCount = await ParkingTicketDb.count({businessId:{ $eq:user.businessId}, parkingLocation:{$eq : location? location: user.location}})
+        if(recCount == 0)
+            return new ApiResponse(400, 'No Records Found!', null, null)
         const pageOptions = {
             page: parseInt(page, 10) || 0,
             limit: parseInt(limit, 10) || 10
@@ -213,11 +215,50 @@ async function getListOfParkingTicket(fromDate, toDate, page, limit, user, locat
     }
  }
 
+async function getListOfParkingTicketForAdmin(businessId, fromDate, toDate, page, limit, location = null){
+    try {
+        
+        let filter = [{businessId:{ $eq:businessId}}]
+        let filertMap = {businessId:{ $eq:businessId}}
+        if(location){
+            filter.push({parkingLocation:{$eq : location}})
+            filertMap['parkingLocation'] = {$eq : location}
+        }
+                
+        let recCount = await ParkingTicketDb.count(filertMap)
+        if(recCount == 0)
+            return new ApiResponse(400, 'No Records Found!', null, null)
+        const pageOptions = {
+            page: parseInt(page, 10) || 0,
+            limit: parseInt(limit, 10) || 10
+        }    
+    
+        
+        if(fromDate && toDate){
+            filter.push({created_on: {
+                $gte: new Date(fromDate), 
+                $lt: new Date(toDate)
+            }})
+        }    
+        let parkingTicketDb = await ParkingTicketDb.find({ $and: filter })
+                                                    .skip(pageOptions.page * pageOptions.limit)
+                                                    .limit(pageOptions.limit)   
+        
+        if(!parkingTicketDb || parkingTicketDb.length == 0)
+            return new ApiResponse(400, 'No Records Found!', null, null)
+        
+        let listData = {start: page, count: parkingTicketDb.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: parkingTicketDb}     
+        return new ApiResponse(200, 'Parking Ticket Fetched Successfully!', null, listData)    
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
+    }
+}
 module.exports={
     generateParkingTicket, 
     getParkingTicket, 
     getListOfParkingTicket, 
     updateParkingTicketStatus, 
     getParkingTicketById,
-    registerVehicle
+    registerVehicle,
+    getListOfParkingTicketForAdmin
 }
