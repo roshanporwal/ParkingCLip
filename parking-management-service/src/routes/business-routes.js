@@ -23,6 +23,8 @@ route.post('/rates', RouteSecurity.autherizeRouteForBusinessUser, businessContro
 //Get Rate Structure list
 route.get('/rates/:businessId', RouteSecurity.autherizeRouteForBusinessUser, businessController.getRateStructureByBusinessId)
 
+//Get Revenue per day
+route.get('/revenue/:businessId', RouteSecurity.autherizeRouteForBusinessUser, businessController.getRevenuPerDayeByBusinessId)
 
 
 

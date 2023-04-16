@@ -1,6 +1,6 @@
 const Error = require('../utils/api-response')
 const BusinessService = require('../services/business-service')
-
+const ParkingTicketService = require('../services/parking-service')
 function createBusiness(req, res, next){
     console.log("Controller received request for business registration ", req.body);
     BusinessService.registerBusiness(req.body)
@@ -60,7 +60,17 @@ function getRateStructureByBusinessId(req, res, next){
     })
 }
 
+function getRevenuPerDayeByBusinessId (req, res, next){
+    ParkingTicketService.getRevenuPerDay(req.params.businessId,req.query.fromDate,req.query.toDate, req.query.location)
+    .then(result=>{
+        console.log("Get Revenue Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
+}
 
 module.exports = {
-    createBusiness,getBusinessList, updateBusiness, getBusinessById, addRateStructure, getRateStructureByBusinessId
+    createBusiness,getBusinessList, 
+    updateBusiness, getBusinessById, addRateStructure, 
+    getRateStructureByBusinessId, getRevenuPerDayeByBusinessId
 }

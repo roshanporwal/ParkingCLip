@@ -98,9 +98,9 @@ function getUsersByRole(req, res, next){
     })
 }
 
-function getParkingTickets(req, res, next){
+function getvehicles(req, res, next){
     
-    ParkingTicketService.getListOfParkingTicketForAdmin(req.params.businessId,req.query.fromDate,req.query.toDate,req.query.page,req.query.limit, req.query.location)
+    ParkingTicketService.getListOfVihiclesForAdmin(req.params.businessId,req.query.fromDate,req.query.toDate,req.query.page,req.query.limit, req.query.location)
     .then(result=>{
         console.log("Get ticket list for Admin Conroller Result : ",result)
         res.status(result.statusCode)
@@ -109,6 +109,6 @@ function getParkingTickets(req, res, next){
 }
 
 module.exports={
-    uploadAttendantPhoto, generateOtp, userLogin, getUserInfo, getUserParkingTicket, activateOrDeactivateUser, getUsersByRole, getParkingTickets
+    uploadAttendantPhoto, generateOtp, userLogin, getUserInfo, getUserParkingTicket, activateOrDeactivateUser, getUsersByRole, getvehicles
 }
 

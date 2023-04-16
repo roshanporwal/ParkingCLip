@@ -46,7 +46,14 @@ async function generateParkingTicket(payload, user){
             parkingStatus: PARKING_STATUS.PARKED
         })
         parkingTicketDb.qrCode = qrcode
-        parkingTicketDb = await parkingTicketDb.save()
+        
+        //parkingTicketDb = await getParkingTicketById(parkingTicketDb.ticketId)
+        const rateStructureDb = await RateStructureDb.findOne({businessId: parkingTicketDb.businessId, location: parkingTicketDb.parkingLocation, vehicleType: parkingTicketDb.vehicleType})
+        if(rateStructureDb){
+            const rent = rentCalculus(rateStructureDb, parkingTicketDb)
+            parkingTicketDb.ticketPaymentDetails.parkingCharges = rent
+        }
+        await parkingTicketDb.save()
         //send SMS to vehicle owner
         await SmsService.sendMessage(payload.mobileNo, `Thanks for prarking. Get ticket detaile ${process.env.SERVER_URL}/parkings/vehicle/ticketById/${parkingTicketDb.ticketId}`)
         return new ApiResponse(201, 'Parking Ticket Generated Successfully!', null, parkingTicketDb)    
@@ -84,7 +91,7 @@ async function getParkingTicketById(ticketId){
         let parkingTicketDb = await ParkingTicketDb.findOne({ticketId: ticketId})   
         if(!parkingTicketDb)
             return new ApiResponse(400, 'Invalid ticketId!', null, null)
-        if(parkingTicketDb.parkingStatus === PARKING_STATUS.PARKED){
+        //if(parkingTicketDb.parkingStatus === PARKING_STATUS.PARKED){
             let rateStructureDb = await RateStructureDb.findOne({businessId: parkingTicketDb.businessId, location: parkingTicketDb.parkingLocation, vehicleType: parkingTicketDb.vehicleType})
             if(!rateStructureDb){
                 return new ApiResponse(400, 'Rate Structure Is Not Define!', null, null)
@@ -92,7 +99,7 @@ async function getParkingTicketById(ticketId){
             let rent = rentCalculus(rateStructureDb, parkingTicketDb)
             parkingTicketDb.ticketPaymentDetails.parkingCharges = rent
             parkingTicketDb = await ParkingTicketDb.findByIdAndUpdate({_id:parkingTicketDb._id}, {ticketPaymentDetails: parkingTicketDb.ticketPaymentDetails}, {new: true})
-        }
+        //}
         //parkingTicketDb = await calculateParkingRent(parkingTicketDb)
         if(parkingTicketDb)    
             return new ApiResponse(200, 'Parking Ticket Fetched Successfully!', null, parkingTicketDb)    
@@ -121,7 +128,9 @@ async function getParkingTicketById(ticketId){
 
 function rentCalculus(rateStructureDb, parkingTicketDb){
     if(parkingTicketDb.isRentBasis){
-        let parkedtimeInHr = Math.ceil((new Date().getTime() - parkingTicketDb.entryDateTime.getTime())/3600000 | 1); //createdAt
+        console.log(parkingTicketDb.exitDateTime?parkingTicketDb.exitDateTime.getTime():0)
+        console.log(parkingTicketDb.entryDateTime.getTime())
+        let parkedtimeInHr = Math.ceil(((parkingTicketDb.exitDateTime?parkingTicketDb.exitDateTime.getTime(): new Date().getTime()) - parkingTicketDb.entryDateTime.getTime())/3600000 | 1); //createdAt
     
         let totalRent = 0
         let dayRent = 0
@@ -174,27 +183,42 @@ async function getListOfParkingTicket(fromDate, toDate, page, limit, user, locat
         let filter = [{businessId:{ $eq:user.businessId}},{parkingLocation:{$eq : location? location: user.location}}]    
         let recCount = await ParkingTicketDb.count({businessId:{ $eq:user.businessId}, parkingLocation:{$eq : location? location: user.location}})
         if(recCount == 0)
-            return new ApiResponse(400, 'No Records Found!', null, null)
+            return new ApiResponse(200, 'No Records Found!', null, [])
         const pageOptions = {
             page: parseInt(page, 10) || 0,
             limit: parseInt(limit, 10) || 10
         }    
     
         
-        if(fromDate && toDate){
-            filter.push({created_on: {
-                $gte: new Date(fromDate), 
-                $lt: new Date(toDate)
+        if(fromDate && toDate){      
+            if(!fromDate.includes('+'))
+                fromDate = fromDate.slice(0, fromDate.indexOf('GMT')+3)+'+'+fromDate.slice(fromDate.indexOf('GMT')+3).trim()
+            if(!toDate.includes('+'))
+                toDate = toDate.slice(0, toDate.indexOf('GMT')+3)+'+'+toDate.slice(toDate.indexOf('GMT')+3).trim()          
+            filter.push({createdAt: {
+                $gte: new Date(fromDate).toUTCString(), 
+                $lt: new Date(toDate).toUTCString()
             }})
         }    
-        let parkingTicketDb = await ParkingTicketDb.find({ $and: filter })
+        let parkingTicketDbs = await ParkingTicketDb.find({ $and: filter })
                                                     .skip(pageOptions.page * pageOptions.limit)
                                                     .limit(pageOptions.limit)   
         
-        if(!parkingTicketDb || parkingTicketDb.length == 0)
-            return new ApiResponse(400, 'No Records Found!', null, null)
+        if(!parkingTicketDbs || parkingTicketDbs.length == 0)
+            return new ApiResponse(200, 'No Records Found!', null, [])
         
-        let listData = {start: page, count: parkingTicketDb.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: parkingTicketDb}     
+        parkingTicketDbs = await Promise.all(parkingTicketDbs.map(async (parkingTicketDb) => {            
+                const rateStructureDb = await RateStructureDb.findOne({businessId: parkingTicketDb.businessId, location: parkingTicketDb.parkingLocation, vehicleType: parkingTicketDb.vehicleType})    
+                if(rateStructureDb){
+                    const rent = rentCalculus(rateStructureDb, parkingTicketDb)
+                    parkingTicketDb.ticketPaymentDetails.parkingCharges = rent
+                }
+                        
+            return parkingTicketDb
+        }));    
+        let listData = {start: page, count: parkingTicketDbs.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: parkingTicketDbs}     
+        
+        
         return new ApiResponse(200, 'Parking Ticket Fetched Successfully!', null, listData)    
     } catch (error) {
         return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
@@ -215,7 +239,57 @@ async function getListOfParkingTicket(fromDate, toDate, page, limit, user, locat
     }
  }
 
-async function getListOfParkingTicketForAdmin(businessId, fromDate, toDate, page, limit, location = null){
+async function getListOfVihiclesForAdmin(businessId, fromDate, toDate, page, limit, location = null){
+    try {
+        
+        let filter = [{businessId:{ $eq:businessId}}]
+        let filertMap = {businessId:{ $eq:businessId}}
+        if(location){
+            filter.push({parkingLocation:{$eq : location}})
+            filertMap['parkingLocation'] = {$eq : location}
+        }
+                
+        let recCount = await ParkingTicketDb.count(filertMap).distinct('vehicleRegistrationNo')
+        recCount = recCount.length
+        if(recCount == 0)
+            return new ApiResponse(200, 'No Records Found!', null, [])
+        const pageOptions = {
+            page: parseInt(page, 10) || 0,
+            limit: parseInt(limit, 10) || 10
+        }      
+        
+        if(fromDate && toDate){
+            if(!fromDate.includes('+'))
+                fromDate = fromDate.slice(0, fromDate.indexOf('GMT')+3)+'+'+fromDate.slice(fromDate.indexOf('GMT')+3).trim()
+            if(!toDate.includes('+'))
+                toDate = toDate.slice(0, toDate.indexOf('GMT')+3)+'+'+toDate.slice(toDate.indexOf('GMT')+3).trim()          
+            
+            filter.push({createdAt: {
+                $gte: new Date(fromDate).toUTCString(), 
+                $lt: new Date(toDate).toUTCString()
+            }})
+        }    
+        let parkingTicketDbs = await ParkingTicketDb.find({ $and: filter })                                                    
+                                                    .skip(pageOptions.page * pageOptions.limit)
+                                                    .limit(pageOptions.limit)   
+        
+        if(!parkingTicketDbs || parkingTicketDbs.length == 0)
+            return new ApiResponse(200, 'No Records Found!', null, [])
+        
+        let vehicles ={}        
+        await Promise.all(parkingTicketDbs.map(async (parkingTicketDb) => {            
+            let vehicle = await VehicleDetailsDb.findOne({vehicleRegistrationNo: parkingTicketDb.vehicleRegistrationNo, mobileNo: parkingTicketDb.mobileNo, vehicleType: parkingTicketDb.vehicleType})
+            vehicles[parkingTicketDb.vehicleRegistrationNo] = vehicle
+        }));
+        let vehicleLists = Object.values(vehicles)
+        let listData = {start: page, count: vehicleLists.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: vehicleLists}     
+        return new ApiResponse(200, 'Vehicles Fetched Successfully!', null, listData)    
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
+    }
+}
+
+async function getRevenuPerDay(businessId, fromDate, toDate, location = null){
     try {
         
         let filter = [{businessId:{ $eq:businessId}}]
@@ -227,32 +301,48 @@ async function getListOfParkingTicketForAdmin(businessId, fromDate, toDate, page
                 
         let recCount = await ParkingTicketDb.count(filertMap)
         if(recCount == 0)
-            return new ApiResponse(400, 'No Records Found!', null, null)
-        const pageOptions = {
-            page: parseInt(page, 10) || 0,
-            limit: parseInt(limit, 10) || 10
-        }    
-    
+            return new ApiResponse(200, 'No Records Found!', null, [])              
         
         if(fromDate && toDate){
-            filter.push({created_on: {
-                $gte: new Date(fromDate), 
-                $lt: new Date(toDate)
+            if(!fromDate.includes('+'))
+                fromDate = fromDate.slice(0, fromDate.indexOf('GMT')+3)+'+'+fromDate.slice(fromDate.indexOf('GMT')+3).trim()
+            if(!toDate.includes('+'))
+                toDate = toDate.slice(0, toDate.indexOf('GMT')+3)+'+'+toDate.slice(toDate.indexOf('GMT')+3).trim()          
+            
+            filter.push({createdAt: {
+                $gte: new Date(fromDate).toUTCString(), 
+                $lt: new Date(toDate).toUTCString()
             }})
         }    
-        let parkingTicketDb = await ParkingTicketDb.find({ $and: filter })
-                                                    .skip(pageOptions.page * pageOptions.limit)
-                                                    .limit(pageOptions.limit)   
+        let parkingTicketDbs = await ParkingTicketDb.find({ $and: filter })   
         
-        if(!parkingTicketDb || parkingTicketDb.length == 0)
-            return new ApiResponse(400, 'No Records Found!', null, null)
+        if(!parkingTicketDbs || parkingTicketDbs.length == 0)
+            return new ApiResponse(200, 'No Records Found!', null, [])
         
-        let listData = {start: page, count: parkingTicketDb.length, totalCount: recCount, totalPages: Math.ceil(recCount/limit), data: parkingTicketDb}     
-        return new ApiResponse(200, 'Parking Ticket Fetched Successfully!', null, listData)    
+        let revenuPerDay ={}        
+        parkingTicketDbs.map((parkingTicketDb) => {
+
+          let date =  parkingTicketDb.createdAt.getUTCDate()+"-"+parkingTicketDb.createdAt.getMonth()+"-"+parkingTicketDb.createdAt.getFullYear()             
+          if(revenuPerDay[date]){
+            revenuPerDay[date]['ticketCount'] += 1
+            revenuPerDay[date]['totalAmount'] += parkingTicketDb.ticketPaymentDetails.parkingCharges?parkingTicketDb.ticketPaymentDetails.parkingCharges.totalRent:0
+          }else{
+            revenuPerDay[date] = {
+                date: date,
+                day: parkingTicketDb.createdAt.toLocaleString('en-us', {weekday:'long'}),
+                ticketCount: 1,
+                totalAmount:parkingTicketDb.ticketPaymentDetails.parkingCharges?parkingTicketDb.ticketPaymentDetails.parkingCharges.totalRent:0
+            }
+
+          }  
+        });
+        let revenuPerDayList = Object.values(revenuPerDay)
+        return new ApiResponse(200, 'Vehicles Fetched Successfully!', null, revenuPerDayList)    
     } catch (error) {
         return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
     }
 }
+
 module.exports={
     generateParkingTicket, 
     getParkingTicket, 
@@ -260,5 +350,6 @@ module.exports={
     updateParkingTicketStatus, 
     getParkingTicketById,
     registerVehicle,
-    getListOfParkingTicketForAdmin
+    getListOfVihiclesForAdmin,
+    getRevenuPerDay
 }
