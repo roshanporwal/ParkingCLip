@@ -113,7 +113,7 @@ async function getParkingTicketById(ticketId){
 
 async function getParkingTicketByVehicle(vehicleRegistrationNo, user){
     try {
-        let parkingTicketDb = await ParkingTicketDb.findOne({vehicleRegistrationNo: {$eq:vehicleRegistrationNo}})   
+        let parkingTicketDb = await ParkingTicketDb.findOne({vehicleRegistrationNo: {$eq:vehicleRegistrationNo}, parkingStatus:{$eq: PARKING_STATUS.PARKED}})   
         if(!parkingTicketDb)
             return new ApiResponse(400, 'Invalid vehicleRegistrationNo!', null, null)
         //if(parkingTicketDb.parkingStatus === PARKING_STATUS.PARKED){
