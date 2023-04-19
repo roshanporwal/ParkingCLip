@@ -2,7 +2,8 @@ const ApiResponse = require('../utils/api-response')
 const CommonService = require('../services/common-service')
 const JwtService = require('../services/jwt-service')
 const ParkingTicketService = require('../services/parking-service')
-
+const ba64 = require("ba64")
+var fs = require('fs');
 function uploadAttendantPhoto(req, res, next){
     res.send()
 }
@@ -107,8 +108,26 @@ function getvehicles(req, res, next){
         res.send(result)
     })
 }
-
+function getvehiclesQrCode (req, res, next){    
+    ParkingTicketService.getVehiclesQrCode(req.params.vehicleRegistrationNo)
+    .then(result=>{
+        console.log("Get vehicle qrcode Conroller Result : ",result)
+        if(result.statusCode==200){
+            const fileName = process.cwd()+'/qrFiles/'+result.data.vehicleRegistrationNo;
+            if(!fs.existsSync(fileName+'.png'))
+                ba64.writeImageSync(fileName, result.data.qrCode);
+            res.contentType('image/png');   
+            res.sendFile(fileName+'.png')                       
+        }else{
+            res.status(result.statusCode)
+            res.send(result)
+        }
+        
+    })
+}
 module.exports={
-    uploadAttendantPhoto, generateOtp, userLogin, getUserInfo, getUserParkingTicket, activateOrDeactivateUser, getUsersByRole, getvehicles
+    uploadAttendantPhoto, generateOtp, userLogin, 
+    getUserInfo, getUserParkingTicket, 
+    activateOrDeactivateUser, getUsersByRole, getvehicles, getvehiclesQrCode
 }
 

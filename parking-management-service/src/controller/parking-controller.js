@@ -60,6 +60,14 @@ function registerVehicle(req, res, next){
         res.send(result)
     })
 }
+function getParkingTicketByVehicle(req, res, next){
+    ParkingTicketService.getParkingTicketByVehicle(req.params.vehicleRegistrationNo, req.user)
+    .then(result=>{
+        console.log("Fetch Parking ticket by vehicle Conroller Result : ",result)
+        res.status(result.statusCode)
+        res.send(result)
+    })
+}
 
 module.exports = {
     scanVehicle, 
@@ -67,5 +75,6 @@ module.exports = {
     getListOfParkingTicket, 
     updateParkingTicket, 
     getParkingTicketById, 
-    registerVehicle
+    registerVehicle,
+    getParkingTicketByVehicle
 }

@@ -111,6 +111,30 @@ async function getParkingTicketById(ticketId){
     }
 }
 
+async function getParkingTicketByVehicle(vehicleRegistrationNo, user){
+    try {
+        let parkingTicketDb = await ParkingTicketDb.findOne({vehicleRegistrationNo: {$eq:vehicleRegistrationNo}})   
+        if(!parkingTicketDb)
+            return new ApiResponse(400, 'Invalid vehicleRegistrationNo!', null, null)
+        //if(parkingTicketDb.parkingStatus === PARKING_STATUS.PARKED){
+            let rateStructureDb = await RateStructureDb.findOne({businessId: parkingTicketDb.businessId, location: parkingTicketDb.parkingLocation, vehicleType: parkingTicketDb.vehicleType})
+            if(!rateStructureDb){
+                return new ApiResponse(400, 'Rate Structure Is Not Define!', null, null)
+            }
+            let rent = rentCalculus(rateStructureDb, parkingTicketDb)
+            parkingTicketDb.ticketPaymentDetails.parkingCharges = rent
+            parkingTicketDb = await ParkingTicketDb.findByIdAndUpdate({_id:parkingTicketDb._id}, {ticketPaymentDetails: parkingTicketDb.ticketPaymentDetails}, {new: true})
+        //}
+        //parkingTicketDb = await calculateParkingRent(parkingTicketDb)
+        if(parkingTicketDb)    
+            return new ApiResponse(200, 'Parking Ticket Fetched Successfully!', null, parkingTicketDb)    
+        else
+            return new ApiResponse(400, 'Exception While Fetching Parking ticket!.', null, null)
+
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
+    }
+}
 // async function calculateParkingRent(parkingTicketDb){
 //     try {
 //         if(parkingTicketDb.parkingStatus === PARKING_STATUS.PARKED){
@@ -342,7 +366,17 @@ async function getRevenuPerDay(businessId, fromDate, toDate, location = null){
         return new ApiResponse(500, 'Exception While Fetching Parking ticket!.', null, error.message)
     }
 }
+async function getVehiclesQrCode(vehicleRegistrationNo){
+    try {
+        let vehicle = await VehicleDetailsDb.findOne({vehicleRegistrationNo: vehicleRegistrationNo})
+        if(vehicle)
+            return new ApiResponse(200, 'Success', null, vehicle)
+        else return new ApiResponse(400, 'No Records Found!', null, null)      
+    } catch (error) {
+        return new ApiResponse(500, 'Exception While Fetching Vehicle!.', null, error)
 
+    }
+}
 module.exports={
     generateParkingTicket, 
     getParkingTicket, 
@@ -351,5 +385,7 @@ module.exports={
     getParkingTicketById,
     registerVehicle,
     getListOfVihiclesForAdmin,
-    getRevenuPerDay
+    getRevenuPerDay,
+    getParkingTicketByVehicle,
+    getVehiclesQrCode
 }
