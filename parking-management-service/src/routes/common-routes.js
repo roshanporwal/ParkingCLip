@@ -22,7 +22,7 @@ route.put('/users/activateOrdeactivate/:userId/:status', RouteSecurity.autherize
 route.get('/users/:role', RouteSecurity.autherizeRouteForAdminUser, CommonController.getUsersByRole)
 
 //Get all parking  tickets by business and location
-route.get('/vehicles/:businessId', RouteSecurity.autherizeRouteForAdminUser, CommonController.getvehicles) 
+route.get('/vehicles/:businessId', RouteSecurity.autherizeRouteForAttendant, CommonController.getvehicles) 
 
 //Get all parking  tickets by business and location
 route.get('/vehicles/qrcode/:vehicleRegistrationNo', CommonController.getvehiclesQrCode) 

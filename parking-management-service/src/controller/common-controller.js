@@ -101,7 +101,7 @@ function getUsersByRole(req, res, next){
 
 function getvehicles(req, res, next){
     
-    ParkingTicketService.getListOfVihiclesForAdmin(req.params.businessId,req.query.fromDate,req.query.toDate,req.query.page,req.query.limit, req.query.location)
+    ParkingTicketService.getListOfVihicles(req.params.businessId,req.query.fromDate,req.query.toDate,req.query.page,req.query.limit, req.query.location)
     .then(result=>{
         console.log("Get ticket list for Admin Conroller Result : ",result)
         res.status(result.statusCode)

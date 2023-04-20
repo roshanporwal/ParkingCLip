@@ -263,7 +263,7 @@ async function getListOfParkingTicket(fromDate, toDate, page, limit, user, locat
     }
  }
 
-async function getListOfVihiclesForAdmin(businessId, fromDate, toDate, page, limit, location = null){
+async function getListOfVihicles(businessId, fromDate, toDate, page, limit, location = null){
     try {
         
         let filter = [{businessId:{ $eq:businessId}}]
@@ -316,6 +316,9 @@ async function getListOfVihiclesForAdmin(businessId, fromDate, toDate, page, lim
 async function getRevenuPerDay(businessId, fromDate, toDate, location = null){
     try {
         
+        if(!businessId || !location){
+            return new ApiResponse(400, 'Business and Location is required!', null, null)
+        }
         let filter = [{businessId:{ $eq:businessId}}]
         let filertMap = {businessId:{ $eq:businessId}}
         if(location){
@@ -384,7 +387,7 @@ module.exports={
     updateParkingTicketStatus, 
     getParkingTicketById,
     registerVehicle,
-    getListOfVihiclesForAdmin,
+    getListOfVihicles,
     getRevenuPerDay,
     getParkingTicketByVehicle,
     getVehiclesQrCode
