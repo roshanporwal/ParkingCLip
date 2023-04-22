@@ -43,7 +43,7 @@ function updateParkingTicket(req, res, next){
 
 function getListOfParkingTicket(req, res, next){
 
-    ParkingTicketService.getListOfParkingTicket(req.query.fromDate,req.query.toDate,req.query.page,req.query.limit, req.user, req.query.location)
+    ParkingTicketService.getListOfParkingTicket(req.query.businessId,req.query.fromDate,req.query.toDate,req.query.page,req.query.limit, req.user, req.query.location)
     .then(result=>{
         console.log("Get list of Parking ticket Conroller Result : ",result)
         res.status(result.statusCode)

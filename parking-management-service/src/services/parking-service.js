@@ -198,14 +198,15 @@ function rentCalculus(rateStructureDb, parkingTicketDb){
  * @param {Number} limit 
  * @returns 
  */
-async function getListOfParkingTicket(fromDate, toDate, page, limit, user, location = null){
+async function getListOfParkingTicket(businessId, fromDate, toDate, page, limit, user, location = null){
     try {
-        
+        if(user.role == UserRole.ADMIN && !businessId)
+            return new ApiResponse(400, 'Business Id is required!', null, null)       
         if(user.role == UserRole.BUSINESS_OWNER && !location)
             return new ApiResponse(400, 'Location is required!', null, null)
 
-        let filter = [{businessId:{ $eq:user.businessId}},{parkingLocation:{$eq : location? location: user.location}}]    
-        let recCount = await ParkingTicketDb.count({businessId:{ $eq:user.businessId}, parkingLocation:{$eq : location? location: user.location}})
+        let filter = [{businessId:{ $eq:businessId?businessId:user.businessId}},{parkingLocation:{$eq : location? location: user.location}}]    
+        let recCount = await ParkingTicketDb.count({businessId:{ $eq:businessId?businessId:user.businessId}, parkingLocation:{$eq : location? location: user.location}})
         if(recCount == 0)
             return new ApiResponse(200, 'No Records Found!', null, [])
         const pageOptions = {
