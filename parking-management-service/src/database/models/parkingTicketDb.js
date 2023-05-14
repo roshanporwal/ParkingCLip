@@ -29,7 +29,7 @@ const parkingTicketScema = new Schema({
     isRentBasis: {Boolean, default: false},
     ticketPaymentDetails: ticketPaymentDetailsSchema,
     vehicleLocation: vehicleLoction,
-    valletNumber:{type: String}    
+    valletNumber:{type: String, default: "NA"}    
     }
 ,{timestamps: true}
 )

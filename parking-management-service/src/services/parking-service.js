@@ -30,7 +30,8 @@ async function generateParkingTicket(payload, user){
             businessName: attendantDb.business.businessName,
             parkingStatus: PARKING_STATUS.PARKED,
             ticketPaymentDetails: {},
-            valletNumber: payload.valletNumber
+            valletNumber: payload.valletNumber,
+            isValletApplicable: payload.isValletApplicable
 
         })
         let qrcode = await QRCodeGenerator.generateQrcode({
@@ -45,7 +46,8 @@ async function generateParkingTicket(payload, user){
             businessId: attendantDb.business.businessId,
             businessName: attendantDb.business.businessName,
             parkingStatus: PARKING_STATUS.PARKED,
-            valletNumber: payload.valletNumber
+            valletNumber: payload.valletNumber,
+            isValletApplicable: payload.isValletApplicable
         })
         parkingTicketDb.qrCode = qrcode
         
