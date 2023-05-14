@@ -80,7 +80,7 @@ async function updateParkingTicketStatus(ticketId, status){
     
     if(!parkingTicketDb)
         return new ApiResponse(400, 'Parking Ticket Id Is Invalid!', null, null)
-    else return new ApiResponse(200, 'Parking Ticket Generated Successfully!', null, parkingTicketDb)       
+    else return new ApiResponse(200, 'Parking Ticket Status Updated Successfully!', null, parkingTicketDb)       
 }
 
 async function getParkingTicket(mobileNo){
