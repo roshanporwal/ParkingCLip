@@ -5,6 +5,12 @@ const ticketPaymentDetailsSchema = new Schema({
     parkingCharges: {type: Object}
 })
 
+const vehicleLoction = new Schema({
+    text:{type: String},
+    gpsCords:{type: String},
+    image:{type: String}
+})
+
 const parkingTicketScema = new Schema({
     ticketId: {type: String, required: true},
     vehicleRegistrationNo: {type: String, required: true},
@@ -22,7 +28,8 @@ const parkingTicketScema = new Schema({
     isValletApplicable: {type: Boolean, default: false},
     isRentBasis: {Boolean, default: false},
     ticketPaymentDetails: ticketPaymentDetailsSchema,
-    
+    vehicleLocation: vehicleLoction,
+    valletNumber:{type: String}    
     }
 ,{timestamps: true}
 )

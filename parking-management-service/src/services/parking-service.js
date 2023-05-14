@@ -29,7 +29,8 @@ async function generateParkingTicket(payload, user){
             businessId: attendantDb.business.businessId,
             businessName: attendantDb.business.businessName,
             parkingStatus: PARKING_STATUS.PARKED,
-            ticketPaymentDetails: {}
+            ticketPaymentDetails: {},
+            valletNumber: payload.valletNumber
 
         })
         let qrcode = await QRCodeGenerator.generateQrcode({
@@ -43,7 +44,8 @@ async function generateParkingTicket(payload, user){
             vehicleType: payload.vehicleType,
             businessId: attendantDb.business.businessId,
             businessName: attendantDb.business.businessName,
-            parkingStatus: PARKING_STATUS.PARKED
+            parkingStatus: PARKING_STATUS.PARKED,
+            valletNumber: payload.valletNumber
         })
         parkingTicketDb.qrCode = qrcode
         
@@ -66,9 +68,13 @@ async function generateParkingTicket(payload, user){
 async function updateParkingTicketStatus(ticketId, status){
     if(!PARKING_STATUS[status])
         return new ApiResponse(400, 'Parking Ticket Status Is Invalid!', null, null)
+    parkingTicketDb = await ParkingTicketDb.findOne({ticketId: ticketId})
+    if(!parkingTicketDb){
+        return new ApiResponse(400, 'Parking Ticket Id Is Invalid!', null, null)
+    }
     
     parkingTicketDb = await ParkingTicketDb.findOneAndUpdate({ticketId: ticketId}, {parkingStatus: PARKING_STATUS[status] ,
-    exitDateTime:PARKING_STATUS[status] === PARKING_STATUS.EXITED ? new Date(): null}, {new: true})
+    exitDateTime:PARKING_STATUS[status] === PARKING_STATUS.EXITED || PARKING_STATUS[status] === PARKING_STATUS.FORCE_EXIT ? new Date(): null}, {new: true})
     
     if(!parkingTicketDb)
         return new ApiResponse(400, 'Parking Ticket Id Is Invalid!', null, null)
@@ -381,6 +387,18 @@ async function getVehiclesQrCode(vehicleRegistrationNo){
 
     }
 }
+
+async function updateVehicleLocation(ticketId, location){
+    try {
+        parkingTicketDb = await ParkingTicketDb.findOneAndUpdate({ticketId: ticketId}, {vehicleLocation: location}, {new: true})
+        if(!parkingTicketDb)
+            return new ApiResponse(400, 'Invalid input!', null, null)
+        return new ApiResponse(200, 'Location updated successfully.', null, null)    
+
+    }catch(error){
+        return new ApiResponse(500, 'Exception While updating Vehicle location!.', null, error)
+    }
+}
 module.exports={
     generateParkingTicket, 
     getParkingTicket, 
@@ -391,5 +409,6 @@ module.exports={
     getListOfVihicles,
     getRevenuPerDay,
     getParkingTicketByVehicle,
-    getVehiclesQrCode
+    getVehiclesQrCode,
+    updateVehicleLocation
 }

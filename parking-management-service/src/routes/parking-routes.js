@@ -20,5 +20,6 @@ route.put('/vehicle/ticketStatus/:ticketId/:status', RouteSecurity.autherizeRout
 route.post('/vehicle/register', parkingController.registerVehicle)
 route.get('/vehicle/ticketByvehicle/:vehicleRegistrationNo', RouteSecurity.autherizeRouteForAttendant, parkingController.getParkingTicketByVehicle)
 
+route.put('/vehicle/location/:ticketId', parkingController.updateVehicleLocation)
 
 module.exports = route
