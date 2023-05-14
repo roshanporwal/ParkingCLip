@@ -53,6 +53,7 @@ async function generateParkingTicket(payload, user){
         
         //parkingTicketDb = await getParkingTicketById(parkingTicketDb.ticketId)
         const rateStructureDb = await RateStructureDb.findOne({businessId: parkingTicketDb.businessId, location: parkingTicketDb.parkingLocation, vehicleType: parkingTicketDb.vehicleType})
+        const valletMsg = payload.isValletApplicable && (!rateStructureDb.isValletApplicable && rateStructureDb.valletCharges === 0) ?" Vallet charges not applicable, As it is not defined.":"";
         if(rateStructureDb){
             const rent = rentCalculus(rateStructureDb, parkingTicketDb)
             parkingTicketDb.ticketPaymentDetails.parkingCharges = rent
@@ -60,7 +61,7 @@ async function generateParkingTicket(payload, user){
         await parkingTicketDb.save()
         //send SMS to vehicle owner
         await SmsService.sendMessage(payload.mobileNo, `Thanks for prarking. Get ticket detaile ${process.env.SERVER_URL}/parkings/vehicle/ticketById/${parkingTicketDb.ticketId}`)
-        return new ApiResponse(201, 'Parking Ticket Generated Successfully!', null, parkingTicketDb)    
+        return new ApiResponse(201, 'Parking Ticket Generated Successfully. '+valletMsg, null, parkingTicketDb)    
     } catch (error) {
         console.log("Error ",error.message)
         return new ApiResponse(500, 'Exception While generating Parking ticket!.', null, error.message)
