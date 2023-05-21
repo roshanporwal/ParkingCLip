@@ -7,6 +7,14 @@ function getTicketGenerateSMSData(mobileNo, ticketId, vehicleRegistrationNo){
     }
 }
 
+function getTicketExitSMSData(mobileNo, ticketId, vehicleRegistrationNo){
+    return {
+        mobileNo: mobileNo,
+        message: `Your vehicle ${vehicleRegistrationNo} left our parking. Click on the below link to view the ticket ${process.env.SERVER_URL}/parkings/vehicle/ticketById/${ticketId}. - Parking-clip.com`,
+        tmplId:"1207168240614235960"
+    }
+}
+
 function getAttendantLoginOTPSMSData(mobileNo, otp){
     return {
         mobileNo: mobileNo,
@@ -24,5 +32,5 @@ function getOwnerLoginOTPSMSData(mobileNo, otp){
 }
 
 module.exports={
-    getTicketGenerateSMSData,getAttendantLoginOTPSMSData,getOwnerLoginOTPSMSData
+    getTicketGenerateSMSData,getAttendantLoginOTPSMSData,getOwnerLoginOTPSMSData, getTicketExitSMSData
 }

@@ -80,7 +80,9 @@ async function updateParkingTicketStatus(ticketId, status){
     
     parkingTicketDb = await ParkingTicketDb.findOneAndUpdate({ticketId: ticketId}, {parkingStatus: PARKING_STATUS[status] ,
     exitDateTime:PARKING_STATUS[status] === PARKING_STATUS.EXITED || PARKING_STATUS[status] === PARKING_STATUS.FORCE_EXIT ? new Date(): null}, {new: true})
-    
+    if(PARKING_STATUS[status] === PARKING_STATUS.EXITED)
+        SmsService.sendMessage(SMSConstant.getTicketExitSMSData(parkingTicketDb.mobileNo, parkingTicketDb.ticketId, parkingTicketDb.vehicleRegistrationNo))
+
     if(!parkingTicketDb)
         return new ApiResponse(400, 'Parking Ticket Id Is Invalid!', null, null)
     else return new ApiResponse(200, 'Parking Ticket Status Updated Successfully!', null, parkingTicketDb)       
@@ -290,8 +292,8 @@ async function getListOfVihicles(businessId, fromDate, toDate, page, limit, loca
         if(recCount == 0)
             return new ApiResponse(200, 'No Records Found!', null, [])
         const pageOptions = {
-            page: parseInt(page, 10) || 0,
-            limit: parseInt(limit, 10) || 10
+            page: parseInt(page, 50) || 0,
+            limit: parseInt(limit, 50) || 50
         }      
         
         if(fromDate && toDate){
@@ -306,8 +308,8 @@ async function getListOfVihicles(businessId, fromDate, toDate, page, limit, loca
             }})
         }    
         let parkingTicketDbs = await ParkingTicketDb.find({ $and: filter })                                                    
-                                                    .skip(pageOptions.page * pageOptions.limit)
-                                                    .limit(pageOptions.limit)   
+                                                    // .skip(pageOptions.page * pageOptions.limit)
+                                                    // .limit(pageOptions.limit)   
         
         if(!parkingTicketDbs || parkingTicketDbs.length == 0)
             return new ApiResponse(200, 'No Records Found!', null, [])
