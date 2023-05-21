@@ -5,6 +5,8 @@ const date = require('date-and-time')
 const UserRole = require('../constants/role-constant')
 const AttendantDb = require('../database/models/attendantDb')
 const BusinessDb = require('../database/models/businessDb')
+const SMSUtility = require('../utils/sms-utility')
+const SMSConstant = require('../constants/sms-constant')
 
 async function generateOtp(mobileNo){
    try {
@@ -16,7 +18,11 @@ async function generateOtp(mobileNo){
             otpDetails = OtpUtility.generateOTP();
             userDb.otpDetails = otpDetails
             await userDb.save()
-            await OtpUtility.sendOtp(mobileNo, otpDetails.code)
+            if(userDb.role == UserRole.ATTENDANT)
+                await SMSUtility.sendMessage(SMSConstant.getAttendantLoginOTPSMSData(mobileNo,otpDetails.code))
+            else
+                await SMSUtility.sendMessage(SMSConstant.getOwnerLoginOTPSMSData(mobileNo,otpDetails.code))    
+            
             return new ApiResponse(200, `Otp sent on ${mobileNo} successfully.`, null, null)
         }
         else

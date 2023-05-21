@@ -9,6 +9,7 @@ const RateStructureDb = require('../database/models/rateStructureDb')
 const VehicleDetailsDb = require('../database/models/vehicleDetailsDb')
 const SmsService = require('../utils/sms-utility')
 const UserRole = require('../constants/role-constant')
+const SMSConstant = require('../constants/sms-constant')
 
 
 async function generateParkingTicket(payload, user){
@@ -60,7 +61,8 @@ async function generateParkingTicket(payload, user){
         }
         await parkingTicketDb.save()
         //send SMS to vehicle owner
-        await SmsService.sendMessage(payload.mobileNo, `Thanks for prarking. Get ticket detaile ${process.env.SERVER_URL}/parkings/vehicle/ticketById/${parkingTicketDb.ticketId}`)
+
+        await SmsService.sendMessage(SMSConstant.getTicketGenerateSMSData(payload.mobileNo, parkingTicketDb.ticketId, parkingTicketDb.vehicleRegistrationNo))
         return new ApiResponse(201, 'Parking Ticket Generated Successfully. '+valletMsg, null, parkingTicketDb)    
     } catch (error) {
         console.log("Error ",error.message)
