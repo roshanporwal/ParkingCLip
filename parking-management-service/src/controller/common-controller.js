@@ -113,11 +113,12 @@ function getvehiclesQrCode (req, res, next){
     .then(result=>{
         console.log("Get vehicle qrcode Conroller Result : ",result)
         if(result.statusCode==200){
-            const fileName = process.cwd()+'/qrFiles/'+result.data.vehicleRegistrationNo;
-            if(!fs.existsSync(fileName+'.png'))
-                ba64.writeImageSync(fileName, result.data.qrCode);
-            res.contentType('image/png');   
-            res.sendFile(fileName+'.png')                       
+            // const fileName = process.cwd()+'/qrFiles/'+result.data.vehicleRegistrationNo;
+            // if(!fs.existsSync(fileName+'.png'))
+            //     ba64.writeImageSync(fileName, result.data.qrCode);
+            // res.contentType('image/png');   
+            // res.sendFile(fileName+'.png')
+            res.send(result.data.qrCode);                       
         }else{
             res.status(result.statusCode)
             res.send(result)
